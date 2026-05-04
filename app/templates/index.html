@@ -8,20 +8,17 @@
             Weave your network <span class="text-brand-600">configs</span> with ease.
         </h1>
         <p class="max-w-2xl mx-auto text-xl text-slate-600 dark:text-slate-400">
-            Convert Excel and CSV data into professional network configurations using powerful Jinja2 templates, enhanced by AI.
+            Professional bulk configuration generator for Cisco, Arista, and Aruba devices.
         </p>
         <div class="flex justify-center gap-4">
-            <button class="px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-brand-500/25">
-                Get Started
-            </button>
-            <div class="flex gap-2">
-                <a href="/static/sample_data.csv" download class="px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 font-bold rounded-xl transition-all text-sm flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    CSV Sample
+            <div class="flex flex-wrap justify-center gap-3">
+                <a href="/api/download-template/global" class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600 font-semibold rounded-xl transition-all text-sm flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download Global Template
                 </a>
-                <a href="/static/sample_data.xlsx" download class="px-4 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 font-bold rounded-xl transition-all text-sm flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Excel Sample
+                <a href="/api/download-template/ports" class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600 font-semibold rounded-xl transition-all text-sm flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download Port Template
                 </a>
             </div>
         </div>
@@ -29,29 +26,105 @@
 
     <!-- Upload Section -->
     <div id="upload-container" class="max-w-3xl mx-auto">
-        <div class="glass rounded-3xl p-8 shadow-xl">
-            <div class="text-center space-y-4">
-                <div class="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 rounded-2xl flex items-center justify-center mx-auto text-brand-600 mb-4">
-                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
-                </div>
-                <h2 class="text-2xl font-bold">Upload Source Data</h2>
-                <p class="text-slate-500">Drag and drop your .xlsx, .xls, or .csv files here</p>
-                
-                <form hx-post="/api/upload" hx-encoding="multipart/form-data" hx-target="#preview-container" class="mt-8">
-                    <label class="relative cursor-pointer group">
-                        <div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-700 group-hover:border-brand-500 rounded-2xl p-12 transition-all">
-                            <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Click to browse or drop file</span>
-                            <input type="file" name="file" class="hidden" accept=".csv, .xlsx, .xls" onchange="this.form.requestSubmit()">
+        <div class="glass rounded-3xl p-10 shadow-2xl border border-white/20">
+            <form hx-post="/api/upload" hx-encoding="multipart/form-data" hx-target="#preview-container" class="space-y-8">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <!-- Step 1: Device Selection -->
+                    <div class="space-y-4">
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold text-sm">1</span>
+                            <h3 class="font-bold text-lg">Select Device Type</h3>
                         </div>
-                    </label>
-                </form>
-            </div>
+                        <div class="grid grid-cols-1 gap-3">
+                            <label class="relative flex items-center p-4 cursor-pointer rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-brand-200 dark:hover:border-brand-900 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/50 dark:has-[:checked]:bg-brand-900/10">
+                                <input type="radio" name="device_type" value="cisco_ios" class="peer hidden" checked>
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold">Cisco IOS</p>
+                                        <p class="text-xs text-slate-500">Global & Interface Split</p>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="relative flex items-center p-4 cursor-pointer rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-brand-200 dark:hover:border-brand-900 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/50 dark:has-[:checked]:bg-brand-900/10">
+                                <input type="radio" name="device_type" value="cisco_ios_xe" class="peer hidden">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold">Cisco IOS-XE</p>
+                                        <p class="text-xs text-slate-500">Modern Enterprise Platforms</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: File Uploads -->
+                    <div class="space-y-6">
+                        <div class="flex items-center gap-3">
+                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold text-sm">2</span>
+                            <h3 class="font-bold text-lg">Upload Data</h3>
+                        </div>
+                        
+                        <!-- Global Config -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold uppercase text-slate-500">Global Configuration (Device level)</label>
+                            <label class="relative block cursor-pointer group">
+                                <div class="flex items-center gap-4 border-2 border-dashed border-slate-200 dark:border-slate-800 group-hover:border-brand-400 rounded-2xl p-4 transition-all bg-slate-50/50 dark:bg-slate-900/20">
+                                    <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                                    </div>
+                                    <div class="flex-1 overflow-hidden">
+                                        <p id="global-file-name" class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">Select global configuration</p>
+                                    </div>
+                                    <input type="file" name="global_file" class="hidden" accept=".csv, .xlsx, .xls" onchange="document.getElementById('global-file-name').textContent = this.files[0].name; checkFilesReady(this.form);">
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Port Mapping -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold uppercase text-slate-500">Port Mapping (Interface level)</label>
+                            <label class="relative block cursor-pointer group">
+                                <div class="flex items-center gap-4 border-2 border-dashed border-slate-200 dark:border-slate-800 group-hover:border-brand-400 rounded-2xl p-4 transition-all bg-slate-50/50 dark:bg-slate-900/20">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m4-4l-4-4"></path></svg>
+                                    </div>
+                                    <div class="flex-1 overflow-hidden">
+                                        <p id="port-file-name" class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">Select port mapping</p>
+                                    </div>
+                                    <input type="file" name="port_file" class="hidden" accept=".csv, .xlsx, .xls" onchange="document.getElementById('port-file-name').textContent = this.files[0].name; checkFilesReady(this.form);">
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <script>
+                    function checkFilesReady(form) {
+                        const global = form.querySelector('[name=global_file]').files.length > 0;
+                        const port = form.querySelector('[name=port_file]').files.length > 0;
+                        form.querySelector('button[type=submit]').disabled = !(global && port);
+                    }
+                </script>
+
+                <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-center">
+                    <button type="submit" disabled class="px-10 py-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-500/30 flex items-center gap-3">
+                        Analyze & Parse
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
     <!-- Preview Container (Target for HTMX) -->
-    <div id="preview-container" class="max-w-5xl mx-auto">
-        <!-- Preview data will appear here -->
+    <div id="preview-container" class="max-w-6xl mx-auto min-h-[400px]">
+        <!-- Preview data and validation will appear here -->
     </div>
 </div>
 {% endblock %}

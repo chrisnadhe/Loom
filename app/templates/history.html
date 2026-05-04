@@ -28,7 +28,9 @@
                         {{ config.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
                     </td>
                     <td class="px-6 py-4 text-right">
-                        <button onclick="alert('Content: \n\n{{ config.generated_content | replace('\'', '\\\'') | replace('\n', '\\n') }}')" class="text-brand-600 hover:text-brand-700 font-bold text-sm">
+                        <button 
+                            onclick="openModal('{{ config.device_name }}', `{{ config.generated_content | replace('`', '\\`') }}`)" 
+                            class="text-brand-600 hover:text-brand-700 font-bold text-sm">
                             View
                         </button>
                     </td>
@@ -44,4 +46,45 @@
         </table>
     </div>
 </div>
+
+<!-- Modal -->
+<div id="viewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 opacity-0">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[80vh] rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col scale-95 transition-transform duration-300">
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
+            <h3 id="modalTitle" class="text-xl font-bold">Config Preview</h3>
+            <button onclick="closeModal()" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+        <div class="p-6 overflow-auto flex-1">
+            <pre id="modalContent" class="p-6 bg-slate-50 dark:bg-slate-950 rounded-2xl font-mono text-sm border border-slate-200 dark:border-slate-800 whitespace-pre-wrap"></pre>
+        </div>
+    </div>
+</div>
+
+<script>
+    function openModal(title, content) {
+        const modal = document.getElementById('viewModal');
+        document.getElementById('modalTitle').innerText = title;
+        document.getElementById('modalContent').innerText = content;
+        
+        modal.classList.remove('hidden');
+        setTimeout(() => {
+            modal.classList.add('opacity-100');
+            modal.querySelector('div').classList.add('scale-100');
+        }, 10);
+    }
+
+    function closeModal() {
+        const modal = document.getElementById('viewModal');
+        modal.classList.remove('opacity-100');
+        modal.querySelector('div').classList.remove('scale-100');
+        setTimeout(() => modal.classList.add('hidden'), 300);
+    }
+
+    // Close on click outside
+    window.onclick = function(event) {
+        if (event.target == document.getElementById('viewModal')) closeModal();
+    }
+</script>
 {% endblock %}

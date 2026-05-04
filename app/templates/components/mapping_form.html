@@ -1,31 +1,66 @@
 <input type="hidden" name="template" value="{{ template_name }}">
 
-<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    {% for var in variables %}
-    <div class="space-y-2 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
-        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">
-            {{ var | replace('_', ' ') | title }}
-            <span class="text-xs font-normal text-slate-500 block">Variable: {{ var }}</span>
-        </label>
-        <select name="map_{{ var }}" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand-500">
-            <option value="">-- Ignore / Fixed Value --</option>
-            {% for col in columns %}
-            <option value="{{ col }}" 
-                {% if suggestions and suggestions.get(var) == col %}
-                    selected
-                {% elif not suggestions and col.lower() == var.lower() %}
-                    selected
-                {% endif %}>
-                {{ col }}
-            </option>
-            {% endfor %}
-        </select>
+<!-- Global Variables -->
+{% if global_vars %}
+<div class="space-y-4 mb-8">
+    <div class="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
+        <div class="w-8 h-8 rounded-lg bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+        </div>
+        <h4 class="font-bold text-slate-800 dark:text-slate-200">Global Configuration Variables</h4>
     </div>
-    {% endfor %}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for var in global_vars %}
+        <div class="space-y-2 p-4 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                {{ var | replace('_', ' ') | title }}
+                <span class="text-xs font-normal text-slate-500 block">Variable: {{ var }}</span>
+            </label>
+            <select name="map_{{ var }}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                <option value="">-- Ignore / Fixed Value --</option>
+                {% if global_columns %}
+                <optgroup label="Global Columns">
+                    {% for col in global_columns %}
+                    <option value="{{ col }}" {% if suggestions and suggestions.get(var) == col %}selected{% elif not suggestions and col.lower() == var.lower() %}selected{% endif %}>{{ col }}</option>
+                    {% endfor %}
+                </optgroup>
+                {% endif %}
+            </select>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+{% endif %}
 
-<div class="flex justify-end pt-6">
-    <button type="submit" class="px-10 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-500/30 text-lg">
-        Generate Configurations
-    </button>
+<!-- Interface Variables -->
+{% if interface_vars %}
+<div class="space-y-4">
+    <div class="flex items-center gap-2 pb-2 border-b border-slate-200 dark:border-slate-800">
+        <div class="w-8 h-8 rounded-lg bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m4-4l-4-4"></path></svg>
+        </div>
+        <h4 class="font-bold text-slate-800 dark:text-slate-200">Interface Configuration Variables</h4>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {% for var in interface_vars %}
+        <div class="space-y-2 p-4 rounded-2xl bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-slate-800 shadow-sm hover:shadow-md transition-shadow">
+            <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">
+                {{ var | replace('_', ' ') | title }}
+                <span class="text-xs font-normal text-slate-500 block">Variable: {{ var }}</span>
+            </label>
+            <select name="map_{{ var }}" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand-500 transition-all">
+                <option value="">-- Ignore / Fixed Value --</option>
+                {% if port_columns %}
+                <optgroup label="Port Mapping Columns">
+                    {% for col in port_columns %}
+                    <option value="{{ col }}" {% if suggestions and suggestions.get(var) == col %}selected{% elif not suggestions and col.lower() == var.lower() %}selected{% endif %}>{{ col }}</option>
+                    {% endfor %}
+                </optgroup>
+                {% endif %}
+            </select>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+{% endif %}
+

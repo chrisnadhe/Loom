@@ -1,0 +1,20 @@
+!
+hostname {{ hostname }}
+!
+vrf definition MGMT
+ !
+ address-family ipv4
+ exit-address-family
+!
+{% if dns_domain %}
+ip domain name {{ dns_domain }}
+{% endif %}
+!
+{% if admin_user and admin_password %}
+username {{ admin_user }} privilege 15 secret {{ admin_password }}
+{% endif %}
+!
+{% for ntp in ntp_servers %}
+ntp server {{ ntp }}
+{% endfor %}
+!
