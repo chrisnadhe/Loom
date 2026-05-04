@@ -1,0 +1,31 @@
+<input type="hidden" name="template" value="{{ template_name }}">
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    {% for var in variables %}
+    <div class="space-y-2 p-4 rounded-2xl bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-800">
+        <label class="block text-sm font-bold text-slate-700 dark:text-slate-300">
+            {{ var | replace('_', ' ') | title }}
+            <span class="text-xs font-normal text-slate-500 block">Variable: {{ var }}</span>
+        </label>
+        <select name="map_{{ var }}" class="w-full bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-2 outline-none focus:ring-2 focus:ring-brand-500">
+            <option value="">-- Ignore / Fixed Value --</option>
+            {% for col in columns %}
+            <option value="{{ col }}" 
+                {% if suggestions and suggestions.get(var) == col %}
+                    selected
+                {% elif not suggestions and col.lower() == var.lower() %}
+                    selected
+                {% endif %}>
+                {{ col }}
+            </option>
+            {% endfor %}
+        </select>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="flex justify-end pt-6">
+    <button type="submit" class="px-10 py-4 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-500/30 text-lg">
+        Generate Configurations
+    </button>
+</div>
