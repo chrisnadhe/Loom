@@ -5,9 +5,10 @@
             <p class="text-slate-500">Successfully generated {{ results | length }} configurations.</p>
         </div>
         <div class="flex gap-3">
-            <button class="px-6 py-2 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-all font-bold">
+            <a href="/api/download-zip" class="px-6 py-2 bg-slate-800 text-white rounded-xl hover:bg-slate-700 transition-all font-bold flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
                 Download All (.zip)
-            </button>
+            </a>
             <button onclick="window.location.reload()" class="px-6 py-2 border border-slate-200 dark:border-slate-700 rounded-xl hover:border-brand-500 transition-all font-bold">
                 Start Over
             </button>

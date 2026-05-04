@@ -3,8 +3,16 @@ from fastapi import FastAPI, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from app.routes import views, api
+from app.models.database import create_db_and_tables
 
-app = FastAPI(title="Loom - Network Config Generator")
+from contextlib import asynccontextmanager
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    create_db_and_tables()
+    yield
+
+app = FastAPI(title="Loom - Network Config Generator", lifespan=lifespan)
 
 # Templates and Static files
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))

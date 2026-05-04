@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight">Configuration History</h1>
+            <p class="text-slate-500">Review and re-download previously generated configurations.</p>
+        </div>
+    </div>
+
+    <div class="glass rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl">
+        <table class="w-full text-left">
+            <thead>
+                <tr class="bg-slate-100 dark:bg-slate-900/50">
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Device Name</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Generated At</th>
+                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
+                {% for config in history %}
+                <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
+                    <td class="px-6 py-4">
+                        <span class="font-mono text-sm font-bold text-brand-600">{{ config.device_name }}</span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-slate-500">
+                        {{ config.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
+                    </td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="alert('Content: \n\n{{ config.generated_content | replace('\'', '\\\'') | replace('\n', '\\n') }}')" class="text-brand-600 hover:text-brand-700 font-bold text-sm">
+                            View
+                        </button>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="3" class="px-6 py-12 text-center text-slate-500 italic">
+                        No history found. Generate some configurations to see them here!
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
