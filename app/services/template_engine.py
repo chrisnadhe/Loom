@@ -8,6 +8,14 @@ class TemplateEngine:
             trim_blocks=True,
             lstrip_blocks=False
         )
+        
+        # Add custom globals
+        from datetime import datetime
+        def raise_helper(msg):
+            raise Exception(msg)
+            
+        self.env.globals["now"] = datetime.now().replace(microsecond=0)
+        self.env.globals["raise"] = raise_helper
 
     def list_available_templates(self):
         return [f for f in os.listdir("templates") if f.endswith(".j2")]

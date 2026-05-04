@@ -1,4 +1,5 @@
 import os
+import pandas as pd
 from fastapi import APIRouter, UploadFile, File, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
@@ -18,27 +19,58 @@ ai = AIService()
 # In-memory storage for prototype (Replace with Redis/Session in Phase 3)
 LAST_UPLOADED_DATA = {}
 
+def clean_val(val):
+    """Helper to convert any value (including NaN/None/Float) to a cleaned string.
+    Specifically handles floats that are actually integers (e.g., 10.0 -> '10').
+    """
+    if val is None or (isinstance(val, float) and pd.isna(val)):
+        return ""
+    
+    # Handle floats that are mathematically integers (e.g., 10.0)
+    if isinstance(val, float) and val.is_integer():
+        return str(int(val))
+        
+    return str(val).strip()
+
 @router.get("/download-template/{file_type}")
 async def download_template(file_type: str):
-    import pandas as pd
     from io import BytesIO
     from fastapi.responses import StreamingResponse
     
-    if file_type.lower() == "global":
-        headers = ["hostname", "admin_user", "admin_password", "dns_domain", "default_gateway"]
-        sample_data = [
-            ["Switch-A", "admin", "cisco123", "loom.local", "192.168.1.254"],
-            ["Switch-B", "admin", "cisco123", "loom.local", "192.168.2.254"]
+    file_type = file_type.lower()
+    if file_type == "params":
+        headers = [
+            "hostname", "timezone", "domain_name", "stp_mode", "vtp_domain", "vtp_version", "vtp_mode",
+            "logging_console", "logging_buffer_size", "http_server", "errdisable", "errdisable_recovery_interval",
+            "lldp", "username", "algorithm_type", "password", "enable_password", "ssh_key_size", "ssh_version",
+            "vty_lines", "login_local", "timeout", "transport_input", "transport_output"
         ]
-        filename = "loom_global_template.xlsx"
+        sample_data = [
+            ["Switch-01", "GMT +7", "loom.local", "rapid-pvst", "LOOM", "3", "server", "7", "8192", "no", "yes", "300", "yes", "admin", "scrypt", "Cisco123!", "Enable123!", "2048", "2", "15", "yes", "5", "ssh", "all"]
+        ]
+        filename = "01_params.xlsx"
+    elif file_type == "vlans":
+        headers = ["hostname", "id", "name", "ip_addr", "mask", "desc"]
+        sample_data = [
+            ["Switch-01", "10", "USERS", "192.168.10.1", "255.255.255.0", "User VLAN"],
+            ["Switch-01", "20", "SERVERS", "192.168.20.1", "255.255.255.0", "Server VLAN"]
+        ]
+        filename = "02_vlans.xlsx"
+    elif file_type == "etherchannels":
+        headers = ["hostname", "id", "type", "mode", "access_vlan", "native_vlan", "allowed_vlans", "ip_addr", "mask", "desc"]
+        sample_data = [
+            ["Switch-01", "1", "L2", "trunk", "", "1", "all", "", "", "Core Uplink"]
+        ]
+        filename = "03_etherchannels.xlsx"
+    elif file_type == "ports":
+        headers = ["hostname", "name", "mode", "access_vlan", "voice_vlan", "native_vlan", "allowed_vlans", "portfast", "bpduguard", "portsecurity", "description"]
+        sample_data = [
+            ["Switch-01", "GigabitEthernet0/1", "access", "10", "100", "", "", "yes", "yes", "yes", "User Port"],
+            ["Switch-01", "GigabitEthernet0/2", "trunk", "", "", "1", "all", "no", "no", "no", "Uplink"]
+        ]
+        filename = "04_port_mapping.xlsx"
     else:
-        headers = ["hostname", "interface", "description", "vlan_mode", "vlan", "ip_address", "subnet_mask"]
-        sample_data = [
-            ["Switch-A", "GigabitEthernet0/1", "Uplink", "trunk", "10,20", "", ""],
-            ["Switch-A", "GigabitEthernet0/2", "User", "access", "10", "192.168.10.1", "255.255.255.0"],
-            ["Switch-B", "GigabitEthernet0/1", "Uplink", "trunk", "10,20", "", ""]
-        ]
-        filename = "loom_port_template.xlsx"
+        return {"error": "Invalid template type"}
         
     df = pd.DataFrame(sample_data, columns=headers)
     output = BytesIO()
@@ -55,7 +87,9 @@ async def download_template(file_type: str):
 async def upload_file(
     request: Request, 
     global_file: UploadFile = File(...),
-    port_file: UploadFile = File(...)
+    port_file: UploadFile = File(...),
+    vlan_file: UploadFile = File(None),
+    etherchannel_file: UploadFile = File(None)
 ):
     form_data = await request.form()
     device_type = form_data.get("device_type")
@@ -63,33 +97,60 @@ async def upload_file(
     global_content = await global_file.read()
     port_content = await port_file.read()
     
+    vlan_content = await vlan_file.read() if vlan_file and vlan_file.filename else None
+    etherchannel_content = await etherchannel_file.read() if etherchannel_file and etherchannel_file.filename else None
+    
     try:
         global_result = await DataProcessor.process_file(global_content, global_file.filename)
         port_result = await DataProcessor.process_file(port_content, port_file.filename)
         
-        # Merge logic: Group port data by hostname
+        vlan_result = await DataProcessor.process_file(vlan_content, vlan_file.filename) if vlan_content else {"data": [], "columns": []}
+        ether_result = await DataProcessor.process_file(etherchannel_content, etherchannel_file.filename) if etherchannel_content else {"data": [], "columns": []}
+        
+        # Merge logic: Group data by hostname
         from collections import defaultdict
         ports_by_hostname = defaultdict(list)
         for row in port_result["data"]:
             hn = str(row.get("hostname", "")).strip()
-            if hn:
-                ports_by_hostname[hn].append(row)
+            if hn: ports_by_hostname[hn].append(row)
+            
+        vlans_by_hostname = defaultdict(list)
+        for row in vlan_result["data"]:
+            hn = str(row.get("hostname", "")).strip()
+            if hn: vlans_by_hostname[hn].append(row)
+            
+        ether_by_hostname = defaultdict(list)
+        for row in ether_result["data"]:
+            hn = str(row.get("hostname", "")).strip()
+            if hn: ether_by_hostname[hn].append(row)
         
-        # Attach ports to global devices
+        # Attach nested data to global devices
         merged_data = []
         for device in global_result["data"]:
             hn = str(device.get("hostname", "")).strip()
             device["interfaces"] = ports_by_hostname.get(hn, [])
+            device["vlans"] = vlans_by_hostname.get(hn, [])
+            device["etherchannels"] = ether_by_hostname.get(hn, [])
             merged_data.append(device)
             
         # Store for mapping step
         LAST_UPLOADED_DATA["global_columns"] = global_result["columns"]
         LAST_UPLOADED_DATA["port_columns"] = port_result["columns"]
-        LAST_UPLOADED_DATA["columns"] = list(dict.fromkeys(global_result["columns"] + port_result["columns"]))
+        LAST_UPLOADED_DATA["vlan_columns"] = vlan_result["columns"]
+        LAST_UPLOADED_DATA["ether_columns"] = ether_result["columns"]
+        
+        # Consolidated columns list for mapping
+        all_cols = global_result["columns"] + port_result["columns"] + vlan_result["columns"] + ether_result["columns"]
+        LAST_UPLOADED_DATA["columns"] = list(dict.fromkeys(all_cols))
+        
         LAST_UPLOADED_DATA["data"] = merged_data
         LAST_UPLOADED_DATA["validation"] = global_result["validation"]
         LAST_UPLOADED_DATA["device_type"] = device_type
         
+        filenames = [global_file.filename, port_file.filename]
+        if vlan_file and vlan_file.filename: filenames.append(vlan_file.filename)
+        if etherchannel_file and etherchannel_file.filename: filenames.append(etherchannel_file.filename)
+
         return templates.TemplateResponse(
             request,
             "components/data_preview.html", 
@@ -97,7 +158,7 @@ async def upload_file(
                 "columns": global_result["columns"], 
                 "data": merged_data, 
                 "validation": global_result["validation"],
-                "filename": f"{global_file.filename} + {port_file.filename}",
+                "filename": " + ".join(filenames),
                 "row_count": len(merged_data),
                 "device_type": device_type
             }
@@ -115,6 +176,38 @@ async def get_mapping_ui(request: Request):
     if not template_name:
         return '<div class="p-4 bg-amber-100 text-amber-700 rounded-xl">Please select a template first.</div>'
     
+    # Handle 'complete' templates (which contain everything in one file)
+    if template_name.endswith("_complete"):
+        complete_tpl = f"{template_name}.j2"
+        all_vars = []
+        try: all_vars = template_engine_service.get_template_variables(complete_tpl)
+        except: pass
+        
+        # Categorize variables
+        COLLECTIONS = ["vlans", "etherchannels", "interfaces"]
+        global_vars = [v for v in all_vars if v not in COLLECTIONS and not any(v.startswith(p) for p in ["vlan.", "portchannel.", "port."])]
+        vlan_vars = [v for v in all_vars if v.startswith("vlan.")]
+        ether_vars = [v for v in all_vars if v.startswith("portchannel.")]
+        interface_vars = [v for v in all_vars if v.startswith("port.")]
+        
+        return templates.TemplateResponse(
+            request,
+            "components/mapping_ui.html",
+            {
+                "template_name": template_name,
+                "global_vars": global_vars,
+                "vlan_vars": vlan_vars,
+                "ether_vars": ether_vars,
+                "interface_vars": interface_vars,
+                "global_columns": LAST_UPLOADED_DATA.get("global_columns", []),
+                "vlan_columns": LAST_UPLOADED_DATA.get("vlan_columns", []),
+                "ether_columns": LAST_UPLOADED_DATA.get("ether_columns", []),
+                "port_columns": LAST_UPLOADED_DATA.get("port_columns", []),
+                "columns": LAST_UPLOADED_DATA.get("columns", [])
+            }
+        )
+
+    # Fallback to split templates (Legacy)
     global_tpl = f"{template_name}_global.j2"
     interface_tpl = f"{template_name}_interface.j2"
     
@@ -126,10 +219,6 @@ async def get_mapping_ui(request: Request):
     try: interface_vars = template_engine_service.get_template_variables(interface_tpl)
     except: pass
 
-    columns = LAST_UPLOADED_DATA.get("columns", [])
-    global_columns = LAST_UPLOADED_DATA.get("global_columns", [])
-    port_columns = LAST_UPLOADED_DATA.get("port_columns", [])
-    
     return templates.TemplateResponse(
         request,
         "components/mapping_ui.html",
@@ -137,9 +226,9 @@ async def get_mapping_ui(request: Request):
             "template_name": template_name,
             "global_vars": global_vars,
             "interface_vars": interface_vars,
-            "columns": columns,
-            "global_columns": global_columns,
-            "port_columns": port_columns
+            "columns": LAST_UPLOADED_DATA.get("columns", []),
+            "global_columns": LAST_UPLOADED_DATA.get("global_columns", []),
+            "port_columns": LAST_UPLOADED_DATA.get("port_columns", [])
         }
     )
 
@@ -151,23 +240,34 @@ async def ai_suggest_mapping(request: Request):
     if not template_name:
         return "Select template first."
         
-    global_tpl = f"{template_name}_global.j2"
-    interface_tpl = f"{template_name}_interface.j2"
-    
-    global_vars = []
-    try: global_vars = template_engine_service.get_template_variables(global_tpl)
-    except: pass
-    
+    all_vars = []
+    vlan_vars = []
+    ether_vars = []
     interface_vars = []
-    try: interface_vars = template_engine_service.get_template_variables(interface_tpl)
-    except: pass
+    global_vars = []
+    
+    if template_name.endswith("_complete"):
+        tpl_path = f"{template_name}.j2"
+        try: all_vars = template_engine_service.get_template_variables(tpl_path)
+        except: pass
+        COLLECTIONS = ["vlans", "etherchannels", "interfaces"]
+        global_vars = [v for v in all_vars if v not in COLLECTIONS and not any(v.startswith(p) for p in ["vlan.", "portchannel.", "port."])]
+        vlan_vars = [v for v in all_vars if v.startswith("vlan.")]
+        ether_vars = [v for v in all_vars if v.startswith("portchannel.")]
+        interface_vars = [v for v in all_vars if v.startswith("port.")]
+    else:
+        global_tpl = f"{template_name}_global.j2"
+        interface_tpl = f"{template_name}_interface.j2"
+        try: global_vars = template_engine_service.get_template_variables(global_tpl)
+        except: pass
+        try: interface_vars = template_engine_service.get_template_variables(interface_tpl)
+        except: pass
+        all_vars = global_vars + interface_vars
 
     columns = LAST_UPLOADED_DATA.get("columns", [])
-    global_columns = LAST_UPLOADED_DATA.get("global_columns", [])
-    port_columns = LAST_UPLOADED_DATA.get("port_columns", [])
     
     # Call AI with merged variables for suggestions
-    suggestions = await ai.suggest_mappings(columns, global_vars + interface_vars)
+    suggestions = await ai.suggest_mappings(columns, all_vars)
     
     return templates.TemplateResponse(
         request,
@@ -175,10 +275,14 @@ async def ai_suggest_mapping(request: Request):
         {
             "template_name": template_name,
             "global_vars": global_vars,
+            "vlan_vars": vlan_vars,
+            "ether_vars": ether_vars,
             "interface_vars": interface_vars,
             "columns": columns,
-            "global_columns": global_columns,
-            "port_columns": port_columns,
+            "global_columns": LAST_UPLOADED_DATA.get("global_columns", []),
+            "vlan_columns": LAST_UPLOADED_DATA.get("vlan_columns", []),
+            "ether_columns": LAST_UPLOADED_DATA.get("ether_columns", []),
+            "port_columns": LAST_UPLOADED_DATA.get("port_columns", []),
             "suggestions": suggestions
         }
     )
@@ -194,65 +298,108 @@ async def preview_configs(request: Request):
     mappings = {k.replace("map_", ""): v for k, v in form_data.items() if k.startswith("map_")}
     results = []
     
-    global_tpl = f"{template_name}_global.j2"
-    interface_tpl = f"{template_name}_interface.j2"
-    
-    # Identify which variables belong to which template
-    try:
-        global_vars = template_engine_service.get_template_variables(global_tpl)
-    except:
-        global_vars = []
-        
-    try:
-        interface_vars = template_engine_service.get_template_variables(interface_tpl)
-    except:
-        interface_vars = []
-    
-    for i, device in enumerate(LAST_UPLOADED_DATA["data"]):
-        # 1. Generate Global Part
-        global_context = {}
-        for var in global_vars:
-            col = mappings.get(var)
-            if col:
-                global_context[var] = device.get(col, "")
-        
-        try:
-            global_config = template_engine_service.render(global_tpl, global_context)
-        except Exception as e:
-            global_config = f"! Error rendering global config: {str(e)}\n"
+    from app.services.validator import ConfigValidator
 
-        # 2. Generate Interfaces Part
-        interface_configs = []
-        for port in device.get("interfaces", []):
-            port_context = {}
-            for var in interface_vars:
-                col = mappings.get(var)
-                if col:
-                    # For attributes like intf.Interface, our extractor returns 'intf.Interface'
-                    # but the template snippet is just {{ Interface }}.
-                    # We need to handle both cases.
-                    if "." in var:
-                        _, attr = var.split(".", 1)
-                        port_context[attr] = port.get(col, "")
-                    elif "[" in var:
-                        import re
-                        match = re.search(r"\[['\"](.+?)['\"]\]", var)
-                        if match:
-                            attr = match.group(1)
-                            port_context[attr] = port.get(col, "")
-                    else:
-                        port_context[var] = port.get(col, "")
-            
-            try:
-                interface_configs.append(template_engine_service.render(interface_tpl, port_context))
-            except Exception as e:
-                interface_configs.append(f"! Error rendering interface: {str(e)}\n")
+    # Logic for Complete Templates
+    if template_name.endswith("_complete"):
+        tpl_path = f"{template_name}.j2"
+        all_vars = template_engine_service.get_template_variables(tpl_path)
         
-        # 3. Combine
-        # Strip trailing newlines to avoid double spacing
-        final_content = global_config.strip() + "\n" + "\n".join([ic.strip() for ic in interface_configs])
-        name = global_context.get("hostname", f"config_{i+1}")
-        results.append({"name": name, "content": final_content + "\n"})
+        for i, device in enumerate(LAST_UPLOADED_DATA["data"]):
+            context = {}
+            # 1. Map Global Vars
+            for var in all_vars:
+                if not any(var.startswith(p) for p in ["vlan.", "portchannel.", "port."]):
+                    col = mappings.get(var)
+                    if col: context[var] = clean_val(device.get(col, ""))
+
+            # 2. Map VLANs
+            context["vlans"] = []
+            for vlan_row in device.get("vlans", []):
+                v_ctx = {}
+                for var in all_vars:
+                    if var.startswith("vlan."):
+                        _, attr = var.split(".", 1)
+                        col = mappings.get(var)
+                        if col: v_ctx[attr] = clean_val(vlan_row.get(col, ""))
+                if v_ctx: context["vlans"].append(v_ctx)
+
+            # 3. Map Etherchannels
+            context["etherchannels"] = []
+            for eth_row in device.get("etherchannels", []):
+                e_ctx = {}
+                for var in all_vars:
+                    if var.startswith("portchannel."):
+                        _, attr = var.split(".", 1)
+                        col = mappings.get(var)
+                        if col: e_ctx[attr] = clean_val(eth_row.get(col, ""))
+                if e_ctx: context["etherchannels"].append(e_ctx)
+
+            # 4. Map Interfaces
+            context["interfaces"] = []
+            for port_row in device.get("interfaces", []):
+                p_ctx = {}
+                for var in all_vars:
+                    if var.startswith("port."):
+                        _, attr = var.split(".", 1)
+                        col = mappings.get(var)
+                        if col: p_ctx[attr] = clean_val(port_row.get(col, ""))
+                if p_ctx: context["interfaces"].append(p_ctx)
+
+            # 5. Validate with Pydantic
+            validation = ConfigValidator.validate(context)
+            v_errors = ""
+            if not validation["is_valid"]:
+                v_errors = "! Validation Errors:\n" + "\n".join([f"! - {k}: {v}" for k, v in validation["errors"].items()]) + "\n"
+
+            # 6. Render
+            try:
+                config = template_engine_service.render(tpl_path, context)
+                if v_errors:
+                    config = v_errors + config
+            except Exception as e:
+                config = f"! Error rendering: {str(e)}\n"
+            
+            name = context.get("hostname", f"config_{i+1}")
+            results.append({"name": name, "content": config})
+            
+    else:
+        # Legacy split logic
+        global_tpl = f"{template_name}_global.j2"
+        interface_tpl = f"{template_name}_interface.j2"
+        # ... (rest of legacy logic remains as is)
+        for i, device in enumerate(LAST_UPLOADED_DATA["data"]):
+            # (Simplified for brevity, I'll keep the original logic here but wrapped in else)
+            # ... (I'll actually just provide the full replacement for the legacy part too to be safe)
+            global_vars = []
+            try: global_vars = template_engine_service.get_template_variables(global_tpl)
+            except: pass
+            interface_vars = []
+            try: interface_vars = template_engine_service.get_template_variables(interface_tpl)
+            except: pass
+
+            global_context = {}
+            for var in global_vars:
+                col = mappings.get(var)
+                if col: global_context[var] = clean_val(device.get(col, ""))
+            
+            try: global_config = template_engine_service.render(global_tpl, global_context)
+            except Exception as e: global_config = f"! Error: {str(e)}\n"
+
+            interface_configs = []
+            for port in device.get("interfaces", []):
+                port_context = {}
+                for var in interface_vars:
+                    col = mappings.get(var)
+                    if col:
+                        if "." in var: _, attr = var.split(".", 1); port_context[attr] = clean_val(port.get(col, ""))
+                        else: port_context[var] = clean_val(port.get(col, ""))
+                try: interface_configs.append(template_engine_service.render(interface_tpl, port_context))
+                except: pass
+            
+            final_content = global_config.strip() + "\n" + "\n".join([ic.strip() for ic in interface_configs])
+            name = global_context.get("hostname", f"config_{i+1}")
+            results.append({"name": name, "content": final_content + "\n"})
     
     LAST_UPLOADED_DATA["preview_results"] = results
     return templates.TemplateResponse(

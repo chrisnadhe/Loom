@@ -1,9 +1,0 @@
-interface {{ Interface }}
- {% if Description %}
- description {{ Description }}
- {% endif %}
- switchport mode access
- switchport access vlan {{ Vlan }}
- spanning-tree portfast
- no shutdown
-!

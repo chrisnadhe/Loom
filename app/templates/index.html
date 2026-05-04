@@ -10,49 +10,96 @@
         <p class="max-w-2xl mx-auto text-xl text-slate-600 dark:text-slate-400">
             Professional bulk configuration generator for Cisco, Arista, and Aruba devices.
         </p>
-        <div class="flex justify-center gap-4">
-            <div class="flex flex-wrap justify-center gap-3">
-                <a href="/api/download-template/global" class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600 font-semibold rounded-xl transition-all text-sm flex items-center gap-2 shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Download Global Template
+        <div class="flex flex-col items-center gap-6">
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="/api/download-template/params"
+                    class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600 font-semibold rounded-xl transition-all text-sm flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9-3-9m-9 9h18">
+                        </path>
+                    </svg>
+                    01. Global Params
                 </a>
-                <a href="/api/download-template/ports" class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600 font-semibold rounded-xl transition-all text-sm flex items-center gap-2 shadow-sm">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-                    Download Port Template
+                <a href="/api/download-template/vlans"
+                    class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600 font-semibold rounded-xl transition-all text-sm flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
+                        </path>
+                    </svg>
+                    02. VLANs
+                </a>
+                <a href="/api/download-template/etherchannels"
+                    class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600 font-semibold rounded-xl transition-all text-sm flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                        </path>
+                    </svg>
+                    03. Etherchannels
+                </a>
+                <a href="/api/download-template/ports"
+                    class="px-5 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 hover:text-brand-600 font-semibold rounded-xl transition-all text-sm flex items-center gap-2 shadow-sm">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m4-4l-4-4"></path>
+                    </svg>
+                    04. Port Mapping
                 </a>
             </div>
+            <p class="text-xs text-slate-500 italic">Templates are compatible with both Cisco IOS and IOS-XE.</p>
         </div>
     </section>
 
     <!-- Upload Section -->
     <div id="upload-container" class="max-w-3xl mx-auto">
         <div class="glass rounded-3xl p-10 shadow-2xl border border-white/20">
-            <form hx-post="/api/upload" hx-encoding="multipart/form-data" hx-target="#preview-container" class="space-y-8">
+            <form hx-post="/api/upload" hx-encoding="multipart/form-data" hx-target="#preview-container"
+                class="space-y-8">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                     <!-- Step 1: Device Selection -->
                     <div class="space-y-4">
                         <div class="flex items-center gap-3">
-                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold text-sm">1</span>
+                            <span
+                                class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold text-sm">1</span>
                             <h3 class="font-bold text-lg">Select Device Type</h3>
                         </div>
                         <div class="grid grid-cols-1 gap-3">
-                            <label class="relative flex items-center p-4 cursor-pointer rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-brand-200 dark:hover:border-brand-900 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/50 dark:has-[:checked]:bg-brand-900/10">
-                                <input type="radio" name="device_type" value="cisco_ios" class="peer hidden" checked>
+                            <!-- Cisco IOS -->
+                            <label
+                                class="relative flex items-center p-4 cursor-pointer rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-brand-200 dark:hover:border-brand-900 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/50 dark:has-[:checked]:bg-brand-900/10">
+                                <input type="radio" name="device_type" value="cisco_ios_complete" class="peer hidden"
+                                    checked>
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"></path></svg>
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01">
+                                            </path>
+                                        </svg>
                                     </div>
                                     <div>
                                         <p class="font-bold">Cisco IOS</p>
-                                        <p class="text-xs text-slate-500">Global & Interface Split</p>
+                                        <p class="text-xs text-slate-500">Classic Enterprise Platforms</p>
                                     </div>
                                 </div>
                             </label>
-                            <label class="relative flex items-center p-4 cursor-pointer rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-brand-200 dark:hover:border-brand-900 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/50 dark:has-[:checked]:bg-brand-900/10">
-                                <input type="radio" name="device_type" value="cisco_ios_xe" class="peer hidden">
+
+                            <!-- Cisco IOS-XE -->
+                            <label
+                                class="relative flex items-center p-4 cursor-pointer rounded-2xl border-2 border-slate-100 dark:border-slate-800 hover:border-brand-200 dark:hover:border-brand-900 transition-all has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50/50 dark:has-[:checked]:bg-brand-900/10">
+                                <input type="radio" name="device_type" value="cisco_ios_xe_complete"
+                                    class="peer hidden">
                                 <div class="flex items-center gap-3">
-                                    <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01">
+                                            </path>
+                                        </svg>
                                     </div>
                                     <div>
                                         <p class="font-bold">Cisco IOS-XE</p>
@@ -60,44 +107,158 @@
                                     </div>
                                 </div>
                             </label>
+
+                            <!-- Arista EOS (Coming Soon) -->
+                            <div
+                                class="relative flex items-center p-4 rounded-2xl border-2 border-slate-50 dark:border-slate-800/50 bg-slate-50/30 dark:bg-slate-900/10 opacity-60">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-500">Arista EOS</p>
+                                        <p
+                                            class="text-[10px] font-bold uppercase tracking-wider text-brand-500 px-1.5 py-0.5 bg-brand-50 dark:bg-brand-900/20 rounded-md inline-block">
+                                            Coming Soon</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Aruba AOS-CX (Coming Soon) -->
+                            <div
+                                class="relative flex items-center p-4 rounded-2xl border-2 border-slate-50 dark:border-slate-800/50 bg-slate-50/30 dark:bg-slate-900/10 opacity-60">
+                                <div class="flex items-center gap-3">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-400">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div>
+                                        <p class="font-bold text-slate-500">Aruba AOS-CX</p>
+                                        <p
+                                            class="text-[10px] font-bold uppercase tracking-wider text-orange-500 px-1.5 py-0.5 bg-orange-50 dark:bg-orange-900/20 rounded-md inline-block">
+                                            Coming Soon</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Step 2: File Uploads -->
                     <div class="space-y-6">
                         <div class="flex items-center gap-3">
-                            <span class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold text-sm">2</span>
+                            <span
+                                class="flex items-center justify-center w-8 h-8 rounded-full bg-brand-100 text-brand-600 font-bold text-sm">2</span>
                             <h3 class="font-bold text-lg">Upload Data</h3>
                         </div>
-                        
+
                         <!-- Global Config -->
                         <div class="space-y-2">
-                            <label class="text-xs font-bold uppercase text-slate-500">Global Configuration (Device level)</label>
+                            <label class="text-xs font-bold uppercase text-slate-500">Global Configuration (Device
+                                level)</label>
                             <label class="relative block cursor-pointer group">
-                                <div class="flex items-center gap-4 border-2 border-dashed border-slate-200 dark:border-slate-800 group-hover:border-brand-400 rounded-2xl p-4 transition-all bg-slate-50/50 dark:bg-slate-900/20">
-                                    <div class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>
+                                <div
+                                    class="flex items-center gap-4 border-2 border-dashed border-slate-200 dark:border-slate-800 group-hover:border-brand-400 rounded-2xl p-4 transition-all bg-slate-50/50 dark:bg-slate-900/20">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9-3-9m-9 9h18">
+                                            </path>
+                                        </svg>
                                     </div>
                                     <div class="flex-1 overflow-hidden">
-                                        <p id="global-file-name" class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">Select global configuration</p>
+                                        <p id="global-file-name"
+                                            class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">
+                                            Select global configuration</p>
                                     </div>
-                                    <input type="file" name="global_file" class="hidden" accept=".csv, .xlsx, .xls" onchange="document.getElementById('global-file-name').textContent = this.files[0].name; checkFilesReady(this.form);">
+                                    <input type="file" name="global_file" class="hidden" accept=".csv, .xlsx, .xls"
+                                        onchange="document.getElementById('global-file-name').textContent = this.files[0].name; checkFilesReady(this.form);">
                                 </div>
                             </label>
                         </div>
 
                         <!-- Port Mapping -->
                         <div class="space-y-2">
-                            <label class="text-xs font-bold uppercase text-slate-500">Port Mapping (Interface level)</label>
+                            <label class="text-xs font-bold uppercase text-slate-500">Port Mapping (Interface
+                                level)</label>
                             <label class="relative block cursor-pointer group">
-                                <div class="flex items-center gap-4 border-2 border-dashed border-slate-200 dark:border-slate-800 group-hover:border-brand-400 rounded-2xl p-4 transition-all bg-slate-50/50 dark:bg-slate-900/20">
-                                    <div class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
-                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m4-4l-4-4"></path></svg>
+                                <div
+                                    class="flex items-center gap-4 border-2 border-dashed border-slate-200 dark:border-slate-800 group-hover:border-brand-400 rounded-2xl p-4 transition-all bg-slate-50/50 dark:bg-slate-900/20">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-indigo-100 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m4-4l-4-4"></path>
+                                        </svg>
                                     </div>
                                     <div class="flex-1 overflow-hidden">
-                                        <p id="port-file-name" class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">Select port mapping</p>
+                                        <p id="port-file-name"
+                                            class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">
+                                            Select port mapping</p>
                                     </div>
-                                    <input type="file" name="port_file" class="hidden" accept=".csv, .xlsx, .xls" onchange="document.getElementById('port-file-name').textContent = this.files[0].name; checkFilesReady(this.form);">
+                                    <input type="file" name="port_file" class="hidden" accept=".csv, .xlsx, .xls"
+                                        onchange="document.getElementById('port-file-name').textContent = this.files[0].name; checkFilesReady(this.form);">
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- VLAN Mapping -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold uppercase text-slate-500">VLAN Mapping (Optional)</label>
+                            <label class="relative block cursor-pointer group">
+                                <div
+                                    class="flex items-center gap-4 border-2 border-dashed border-slate-200 dark:border-slate-800 group-hover:border-brand-400 rounded-2xl p-4 transition-all bg-slate-50/50 dark:bg-slate-900/20">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 overflow-hidden">
+                                        <p id="vlan-file-name"
+                                            class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">
+                                            Select VLAN mapping</p>
+                                    </div>
+                                    <input type="file" name="vlan_file" class="hidden" accept=".csv, .xlsx, .xls"
+                                        onchange="document.getElementById('vlan-file-name').textContent = this.files[0].name; checkFilesReady(this.form);">
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Etherchannel Mapping -->
+                        <div class="space-y-2">
+                            <label class="text-xs font-bold uppercase text-slate-500">Etherchannel Mapping
+                                (Optional)</label>
+                            <label class="relative block cursor-pointer group">
+                                <div
+                                    class="flex items-center gap-4 border-2 border-dashed border-slate-200 dark:border-slate-800 group-hover:border-brand-400 rounded-2xl p-4 transition-all bg-slate-50/50 dark:bg-slate-900/20">
+                                    <div
+                                        class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600">
+                                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                    <div class="flex-1 overflow-hidden">
+                                        <p id="etherchannel-file-name"
+                                            class="text-sm font-medium text-slate-600 dark:text-slate-400 truncate">
+                                            Select Etherchannel mapping</p>
+                                    </div>
+                                    <input type="file" name="etherchannel_file" class="hidden"
+                                        accept=".csv, .xlsx, .xls"
+                                        onchange="document.getElementById('etherchannel-file-name').textContent = this.files[0].name; checkFilesReady(this.form);">
                                 </div>
                             </label>
                         </div>
@@ -108,14 +269,19 @@
                     function checkFilesReady(form) {
                         const global = form.querySelector('[name=global_file]').files.length > 0;
                         const port = form.querySelector('[name=port_file]').files.length > 0;
+                        // VLAN and Etherchannel are optional but we need at least Global and Port for basic functionality
                         form.querySelector('button[type=submit]').disabled = !(global && port);
                     }
                 </script>
 
                 <div class="pt-4 border-t border-slate-100 dark:border-slate-800 flex justify-center">
-                    <button type="submit" disabled class="px-10 py-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-500/30 flex items-center gap-3">
+                    <button type="submit" disabled
+                        class="px-10 py-4 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-500/30 flex items-center gap-3">
                         Analyze & Parse
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
+                        </svg>
                     </button>
                 </div>
             </form>
