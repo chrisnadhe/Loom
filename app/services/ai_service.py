@@ -17,8 +17,7 @@ class AIService:
         And a Jinja2 template with these variables: {variables}
         
         Please suggest a mapping from template variables to data columns.
-        Return only a JSON object where keys are template variables and values are the best matching data columns.
-        If no good match is found, use null.
+        Return ONLY a raw JSON object. No markdown, no explanations.
         
         Example: {{"hostname": "DeviceName", "ip_address": "IP"}}
         """
@@ -26,13 +25,19 @@ class AIService:
         try:
             response = completion(
                 model=self.model,
-                messages=[{"role": "user", "content": prompt}],
-                response_format={"type": "json_object"}
+                messages=[{"role": "user", "content": prompt}]
             )
-            return json.loads(response.choices[0].message.content)
+            content = response.choices[0].message.content
+            # Clean up potential markdown formatting
+            if "```json" in content:
+                content = content.split("```json")[1].split("```")[0]
+            elif "```" in content:
+                content = content.split("```")[1].split("```")[0]
+            
+            return json.loads(content.strip())
         except Exception as e:
             print(f"AI Mapping Error: {e}")
-            return {{}}
+            return {}
 
     async def generate_template(self, config_snippet: str):
         prompt = f"""
