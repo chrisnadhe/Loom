@@ -1,0 +1,11 @@
+hostname {{ hostname }}
+!
+interface GigabitEthernet0/1
+ description Connected to {{ peer_name }}
+ ip address {{ ip_address }} {{ subnet_mask }}
+ no shutdown
+!
+line vty 0 4
+ transport input ssh
+ login local
+!

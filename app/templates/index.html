@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-12">
+    <!-- Hero Section -->
+    <section class="text-center space-y-6 py-12">
+        <h1 class="text-5xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-6xl">
+            Weave your network <span class="text-brand-600">configs</span> with ease.
+        </h1>
+        <p class="max-w-2xl mx-auto text-xl text-slate-600 dark:text-slate-400">
+            Convert Excel and CSV data into professional network configurations using powerful Jinja2 templates, enhanced by AI.
+        </p>
+        <div class="flex justify-center gap-4">
+            <button class="px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl transition-all shadow-lg shadow-brand-500/25">
+                Get Started
+            </button>
+            <button class="px-8 py-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-brand-500 font-bold rounded-xl transition-all">
+                Learn More
+            </button>
+        </div>
+    </section>
+
+    <!-- Upload Section -->
+    <div id="upload-container" class="max-w-3xl mx-auto">
+        <div class="glass rounded-3xl p-8 shadow-xl">
+            <div class="text-center space-y-4">
+                <div class="w-16 h-16 bg-brand-100 dark:bg-brand-900/30 rounded-2xl flex items-center justify-center mx-auto text-brand-600 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                </div>
+                <h2 class="text-2xl font-bold">Upload Source Data</h2>
+                <p class="text-slate-500">Drag and drop your .xlsx, .xls, or .csv files here</p>
+                
+                <form hx-post="/api/upload" hx-encoding="multipart/form-data" hx-target="#preview-container" class="mt-8">
+                    <label class="relative cursor-pointer group">
+                        <div class="flex flex-col items-center justify-center border-2 border-dashed border-slate-300 dark:border-slate-700 group-hover:border-brand-500 rounded-2xl p-12 transition-all">
+                            <span class="text-sm font-medium text-slate-600 dark:text-slate-400">Click to browse or drop file</span>
+                            <input type="file" name="file" class="hidden" accept=".csv, .xlsx, .xls" onchange="this.form.requestSubmit()">
+                        </div>
+                    </label>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Container (Target for HTMX) -->
+    <div id="preview-container" class="max-w-5xl mx-auto">
+        <!-- Preview data will appear here -->
+    </div>
+</div>
+{% endblock %}

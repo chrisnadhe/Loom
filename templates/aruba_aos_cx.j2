@@ -1,0 +1,9 @@
+hostname {{ hostname }}
+!
+vlan {{ vlan_id }}
+ name {{ vlan_name }}
+!
+interface 1/1/1
+ no shutdown
+ vlan access {{ vlan_id }}
+!
