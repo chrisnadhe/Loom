@@ -1,80 +1,119 @@
+"""
+Data processing utilities: file parsing, data cleaning, and device merging.
+"""
+
+import io
+from collections import defaultdict
+from typing import Any
+
 import pandas as pd
-from io import BytesIO
-import json
+
+
+def clean_val(val: Any) -> str:
+    """
+    Convert any value to a clean string suitable for Jinja2 template rendering.
+
+    - None / NaN → empty string ""
+    - Float that is mathematically an integer (e.g. 10.0) → "10"
+    - Everything else → str(val).strip()
+    """
+    if val is None or (isinstance(val, float) and pd.isna(val)):
+        return ""
+    if isinstance(val, float) and val.is_integer():
+        return str(int(val))
+    return str(val).strip()
+
 
 class DataProcessor:
+
     @staticmethod
     async def process_file(content: bytes, filename: str) -> dict:
-        import io
-        import pandas as pd
-        
+        """
+        Parse an uploaded Excel or CSV file.
+
+        Returns a dict with keys:
+            columns  : list[str]   — column names in original order
+            data     : list[dict]  — rows as list of dicts
+            row_count: int
+            validation: list[dict] — per-row error dicts (may be empty)
+        """
         file_io = io.BytesIO(content)
-        if filename.endswith('.csv'):
-            # Smart delimiter detection
-            df = pd.read_csv(file_io, sep=None, engine='python')
-        elif filename.endswith(('.xlsx', '.xls')):
+
+        if filename.endswith(".csv"):
+            df = pd.read_csv(file_io, sep=None, engine="python")
+        elif filename.endswith((".xlsx", ".xls")):
             df = pd.read_excel(file_io)
         else:
-            raise ValueError("Unsupported file format")
-        
-        # Clean column names
+            raise ValueError(f"Unsupported file format: {filename!r}")
+
+        # Normalise column names
         df.columns = [str(c).strip() for c in df.columns]
-        
-        # Convert to list of dictionaries for Jinja2
-        data = df.to_dict(orient='records')
-        columns = df.columns.tolist()
-        
-        # Validate data
-        validation_results = DataProcessor.validate_data(data)
-        
+
+        data: list[dict] = df.to_dict(orient="records")
+        columns: list[str] = df.columns.tolist()
+        validation = DataProcessor._validate_hostnames(data)
+
         return {
             "columns": columns,
             "data": data,
             "row_count": len(df),
-            "validation": validation_results
+            "validation": validation,
         }
 
     @staticmethod
-    def validate_data(data: list) -> list:
-        import ipaddress
-        results = []
-        hostnames = set()
-        
-        for i, row in enumerate(data):
-            errors = {}
-            # Required fields (can be customized or based on mapping later)
-            # For initial validation, we look for common network fields
-            
-            hostname = str(row.get('hostname', '')).strip()
-            if not hostname:
-                errors['hostname'] = "Hostname is required"
-            elif hostname in hostnames:
-                errors['hostname'] = f"Duplicate hostname: {hostname}"
-            hostnames.add(hostname)
+    def _validate_hostnames(data: list[dict]) -> list[dict]:
+        """
+        Light validation: only check that hostname is present and unique.
+        Returning per-row error dicts (empty dict = no errors for that row).
+        """
+        results: list[dict] = []
+        seen: set[str] = set()
 
-            ip = str(row.get('ip', '')).strip()
-            if ip:
-                try:
-                    if '/' in ip:
-                        ipaddress.IPv4Interface(ip)
-                    else:
-                        ipaddress.IPv4Address(ip)
-                except ValueError:
-                    errors['ip'] = "Invalid IPv4 format"
-            
-            vlan = row.get('vlan')
-            if vlan is not None:
-                try:
-                    vlan_id = int(float(vlan))
-                    if not (1 <= vlan_id <= 4094):
-                        errors['vlan'] = "VLAN ID must be 1-4094"
-                except (ValueError, TypeError):
-                    errors['vlan'] = "VLAN must be a number"
+        for row in data:
+            errors: dict[str, str] = {}
+            hostname = str(row.get("hostname", "")).strip()
+
+            if not hostname:
+                errors["hostname"] = "Hostname is required"
+            elif hostname in seen:
+                errors["hostname"] = f"Duplicate hostname: {hostname}"
+            seen.add(hostname)
 
             results.append(errors)
+
         return results
 
     @staticmethod
-    def get_preview(df_dict: dict, rows: int = 5):
-        # Returns first N rows for preview
-        return df_dict["data"][:rows]
+    def merge_device_data(
+        global_data: list[dict],
+        port_data: list[dict],
+        vlan_data: list[dict],
+        ether_data: list[dict],
+    ) -> list[dict]:
+        """
+        Group port / VLAN / etherchannel rows by hostname and attach them
+        as nested lists (interfaces / vlans / etherchannels) to each device
+        from the global data list.
+        """
+
+        def _group_by_hostname(rows: list[dict]) -> dict[str, list[dict]]:
+            grouped: dict[str, list[dict]] = defaultdict(list)
+            for row in rows:
+                hn = str(row.get("hostname", "")).strip()
+                if hn:
+                    grouped[hn].append(row)
+            return grouped
+
+        ports_map = _group_by_hostname(port_data)
+        vlans_map = _group_by_hostname(vlan_data)
+        ether_map = _group_by_hostname(ether_data)
+
+        merged: list[dict] = []
+        for device in global_data:
+            hn = str(device.get("hostname", "")).strip()
+            device["interfaces"] = ports_map.get(hn, [])
+            device["vlans"] = vlans_map.get(hn, [])
+            device["etherchannels"] = ether_map.get(hn, [])
+            merged.append(device)
+
+        return merged

@@ -1,18 +1,15 @@
 from datetime import datetime
-from typing import Optional, List
-from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional
+from sqlmodel import SQLModel, Field
 
-class Template(SQLModel, table=True):
-    id: Optional[int] = Field(default=None, primary_key=True)
-    name: str = Field(index=True)
-    vendor: str # Cisco, Arista, Aruba, etc.
-    content: str # The Jinja2 template content
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class Configuration(SQLModel, table=True):
+    """Stores generated device configurations with full metadata for history."""
+
     id: Optional[int] = Field(default=None, primary_key=True)
-    template_id: int = Field(foreign_key="template.id")
-    device_name: str
+    device_name: str = Field(index=True)
+    os_type: str = Field(default="")        # e.g. cisco_ios_complete
+    template_name: str = Field(default="")  # human-readable label
     generated_content: str
+    ai_review: Optional[str] = Field(default=None)  # JSON string of AI review result
     created_at: datetime = Field(default_factory=datetime.utcnow)

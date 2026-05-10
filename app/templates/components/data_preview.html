@@ -2,51 +2,60 @@
     <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white dark:bg-slate-800/50 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm">
         <div class="space-y-1">
             <h3 class="text-2xl font-bold">Data Analysis: <span class="text-brand-600">{{ filename }}</span></h3>
-            <p class="text-slate-500 font-medium">Found {{ row_count }} devices for <span class="text-slate-900 dark:text-white">{{ device_type | replace('.j2', '') | upper }}</span></p>
+            <p class="text-slate-500 font-medium">Found {{ row_count }} device(s) for <span class="text-slate-900 dark:text-white">{{ device_type | replace('_complete', '') | replace('_', ' ') | upper }}</span></p>
         </div>
-        
+
         <input type="hidden" id="template-select" name="template" value="{{ device_type }}">
-        
-        <button 
-            hx-post="/api/mapping" 
+
+        <button
+            hx-post="/api/mapping"
             hx-include="#template-select"
             hx-target="#mapping-container"
+            hx-indicator="#htmx-indicator"
             class="px-8 py-3 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-2xl transition-all shadow-xl shadow-brand-500/20 flex items-center gap-2 group">
             Proceed to Mapping
-            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"></path></svg>
+            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/>
+            </svg>
         </button>
     </div>
 
+    <!-- Validation summary -->
     {% set total_errors = validation | map('length') | sum %}
     {% if total_errors > 0 %}
     <div class="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-800/50 p-5 rounded-2xl flex items-start gap-4">
         <div class="w-10 h-10 rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center text-amber-600 shrink-0">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/>
+            </svg>
         </div>
         <div>
             <h4 class="font-bold text-amber-800 dark:text-amber-400">Validation Issues Found</h4>
-            <p class="text-sm text-amber-700 dark:text-amber-500">We detected {{ total_errors }} potential issues in your data. Review the highlighted cells below before proceeding.</p>
+            <p class="text-sm text-amber-700 dark:text-amber-500">Detected {{ total_errors }} issue(s) in your data. Review highlighted cells below before proceeding.</p>
         </div>
     </div>
     {% else %}
     <div class="bg-emerald-50 dark:bg-emerald-900/10 border border-emerald-200 dark:border-emerald-800/50 p-5 rounded-2xl flex items-start gap-4">
         <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600 shrink-0">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+            </svg>
         </div>
         <div>
-            <h4 class="font-bold text-emerald-800 dark:text-emerald-400">Data Validated</h4>
-            <p class="text-sm text-emerald-700 dark:text-emerald-500">All basic fields look correct. You can proceed to variable mapping.</p>
+            <h4 class="font-bold text-emerald-800 dark:text-emerald-400">Data Validated Successfully</h4>
+            <p class="text-sm text-emerald-700 dark:text-emerald-500">All device entries look correct. Proceed to variable mapping.</p>
         </div>
     </div>
     {% endif %}
 
+    <!-- Data table -->
     <div class="glass rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl">
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse">
                 <thead>
                     <tr class="bg-slate-50 dark:bg-slate-900/50">
                         {% for col in columns %}
-                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 dark:border-slate-800">
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 border-b border-slate-200 dark:border-slate-800 whitespace-nowrap">
                             {{ col }}
                         </th>
                         {% endfor %}
@@ -72,8 +81,8 @@
                         </td>
                         {% endfor %}
                         <td class="px-6 py-4 text-sm">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-800">
-                                {{ row.interfaces | length }} ports
+                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-brand-100 text-brand-800 dark:bg-brand-900/30 dark:text-brand-400">
+                                {{ (row.interfaces | default([])) | length }} ports
                             </span>
                         </td>
                     </tr>
@@ -83,7 +92,8 @@
         </div>
     </div>
 
-    <div id="mapping-container" class="mt-8 pb-20">
+    <!-- Mapping container -->
+    <div id="mapping-container" class="pb-20">
         <!-- Mapping UI will appear here -->
     </div>
 </div>

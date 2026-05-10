@@ -1,90 +1,194 @@
 {% extends "base.html" %}
 
+{% block title %}History — Loom{% endblock %}
+
 {% block content %}
 <div class="space-y-8">
-    <div class="flex justify-between items-center">
+    <!-- Page header -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
             <h1 class="text-3xl font-bold tracking-tight">Configuration History</h1>
-            <p class="text-slate-500">Review and re-download previously generated configurations.</p>
+            <p class="text-slate-500 mt-1">Review, view, and re-download previously generated configurations.</p>
         </div>
+        {% if history %}
+        <span class="px-3 py-1.5 bg-brand-50 dark:bg-brand-900/20 text-brand-700 dark:text-brand-400 text-sm font-bold rounded-xl">
+            {{ history | length }} record(s)
+        </span>
+        {% endif %}
     </div>
 
+    <!-- Search bar -->
+    <div class="relative">
+        <svg class="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+            type="text"
+            id="history-search"
+            placeholder="Search by device name or OS type…"
+            onkeyup="filterHistory(this.value)"
+            class="w-full pl-10 pr-4 py-3 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl outline-none focus:ring-2 focus:ring-brand-500 transition-all text-sm">
+    </div>
+
+    <!-- History table -->
     <div class="glass rounded-3xl overflow-hidden border border-slate-200 dark:border-slate-800 shadow-xl">
-        <table class="w-full text-left">
-            <thead>
-                <tr class="bg-slate-100 dark:bg-slate-900/50">
-                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Device Name</th>
-                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Generated At</th>
-                    <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody class="divide-y divide-slate-200 dark:divide-slate-800">
-                {% for config in history %}
-                <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors">
-                    <td class="px-6 py-4">
-                        <span class="font-mono text-sm font-bold text-brand-600">{{ config.device_name }}</span>
-                    </td>
-                    <td class="px-6 py-4 text-sm text-slate-500">
-                        {{ config.created_at.strftime('%Y-%m-%d %H:%M:%S') }}
-                    </td>
-                    <td class="px-6 py-4 text-right">
-                        <button 
-                            onclick="openModal('{{ config.device_name }}', `{{ config.generated_content | replace('`', '\\`') }}`)" 
-                            class="text-brand-600 hover:text-brand-700 font-bold text-sm">
-                            View
-                        </button>
-                    </td>
-                </tr>
-                {% else %}
-                <tr>
-                    <td colspan="3" class="px-6 py-12 text-center text-slate-500 italic">
-                        No history found. Generate some configurations to see them here!
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="bg-slate-100 dark:bg-slate-900/50">
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Device Name</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">OS Type</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Template</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500">Generated At</th>
+                        <th class="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="history-tbody" class="divide-y divide-slate-200 dark:divide-slate-800">
+                    {% for config in history %}
+                    <tr class="history-row hover:bg-slate-50 dark:hover:bg-slate-900/30 transition-colors"
+                        data-name="{{ config.device_name | lower }}"
+                        data-os="{{ config.os_type | lower }}">
+                        <td class="px-6 py-4">
+                            <span class="font-mono text-sm font-bold text-brand-600">{{ config.device_name }}</span>
+                        </td>
+                        <td class="px-6 py-4">
+                            {% if config.os_type %}
+                            <span class="px-2.5 py-1 text-xs font-bold rounded-lg bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                                {{ config.os_type | replace('_complete', '') | replace('_', ' ') | upper }}
+                            </span>
+                            {% else %}
+                            <span class="text-slate-400 text-sm">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-500 font-mono">
+                            {{ config.template_name or '—' }}
+                        </td>
+                        <td class="px-6 py-4 text-sm text-slate-500">
+                            {{ config.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <div class="flex items-center justify-end gap-4">
+                                <button
+                                    onclick="openModal({{ config.id }}, '{{ config.device_name }}', `{{ config.generated_content | replace('`', '\\`') | replace('</s', '<\\/s') }}`)"
+                                    class="text-brand-600 hover:text-brand-700 font-bold text-sm transition-colors">
+                                    View
+                                </button>
+                                <a href="/history/{{ config.id }}/download"
+                                    class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 font-bold text-sm transition-colors flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                    </svg>
+                                    Download
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="px-6 py-16 text-center">
+                            <div class="flex flex-col items-center gap-3 text-slate-400">
+                                <svg class="w-12 h-12 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                                </svg>
+                                <p class="font-medium">No history yet.</p>
+                                <a href="/" class="text-brand-600 hover:text-brand-700 font-bold text-sm">Generate your first config →</a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 
-<!-- Modal -->
-<div id="viewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm transition-opacity duration-300 opacity-0">
-    <div class="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[80vh] rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col scale-95 transition-transform duration-300">
-        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center">
-            <h3 id="modalTitle" class="text-xl font-bold">Config Preview</h3>
-            <button onclick="closeModal()" class="text-slate-500 hover:text-slate-700 dark:hover:text-slate-300">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-            </button>
+<!-- View Modal -->
+<div id="viewModal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+    <div class="bg-white dark:bg-slate-900 w-full max-w-4xl max-h-[85vh] rounded-3xl shadow-2xl border border-slate-200 dark:border-slate-800 flex flex-col scale-95 opacity-0 transition-all duration-300" id="modalBox">
+        <!-- Modal header -->
+        <div class="p-6 border-b border-slate-200 dark:border-slate-800 flex justify-between items-center shrink-0">
+            <div>
+                <h3 id="modalTitle" class="text-xl font-bold font-mono text-brand-600"></h3>
+                <p class="text-sm text-slate-500 mt-0.5">Generated configuration</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <button id="modalCopyBtn" onclick="copyModal()"
+                    class="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-brand-600 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-brand-400 transition-colors flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    Copy
+                </button>
+                <a id="modalDownloadBtn" href="#"
+                    class="px-3 py-1.5 text-xs font-bold text-slate-500 hover:text-brand-600 border border-slate-200 dark:border-slate-700 rounded-lg hover:border-brand-400 transition-colors flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    Download
+                </a>
+                <button onclick="closeModal()" class="p-2 text-slate-400 hover:text-slate-700 dark:hover:text-slate-300 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
         </div>
+        <!-- Modal content -->
         <div class="p-6 overflow-auto flex-1">
-            <pre id="modalContent" class="p-6 bg-slate-50 dark:bg-slate-950 rounded-2xl font-mono text-sm border border-slate-200 dark:border-slate-800 whitespace-pre-wrap"></pre>
+            <pre id="modalContent" class="p-6 bg-slate-50 dark:bg-slate-950 rounded-2xl font-mono text-sm border border-slate-200 dark:border-slate-800 whitespace-pre-wrap text-slate-700 dark:text-slate-300 leading-relaxed"></pre>
         </div>
     </div>
 </div>
 
 <script>
-    function openModal(title, content) {
-        const modal = document.getElementById('viewModal');
+    let _currentConfigId = null;
+
+    function openModal(id, title, content) {
+        _currentConfigId = id;
         document.getElementById('modalTitle').innerText = title;
         document.getElementById('modalContent').innerText = content;
-        
+        document.getElementById('modalDownloadBtn').href = '/history/' + id + '/download';
+
+        const modal = document.getElementById('viewModal');
+        const box   = document.getElementById('modalBox');
         modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.classList.add('opacity-100');
-            modal.querySelector('div').classList.add('scale-100');
-        }, 10);
+        requestAnimationFrame(() => {
+            box.classList.remove('scale-95', 'opacity-0');
+            box.classList.add('scale-100', 'opacity-100');
+        });
     }
 
     function closeModal() {
         const modal = document.getElementById('viewModal');
-        modal.classList.remove('opacity-100');
-        modal.querySelector('div').classList.remove('scale-100');
+        const box   = document.getElementById('modalBox');
+        box.classList.remove('scale-100', 'opacity-100');
+        box.classList.add('scale-95', 'opacity-0');
         setTimeout(() => modal.classList.add('hidden'), 300);
     }
 
-    // Close on click outside
-    window.onclick = function(event) {
-        if (event.target == document.getElementById('viewModal')) closeModal();
+    function copyModal() {
+        const content = document.getElementById('modalContent').innerText;
+        const btn = document.getElementById('modalCopyBtn');
+        navigator.clipboard.writeText(content).then(() => {
+            const orig = btn.innerHTML;
+            btn.innerHTML = '✓ Copied!';
+            btn.classList.add('text-emerald-600', 'border-emerald-400');
+            setTimeout(() => { btn.innerHTML = orig; btn.classList.remove('text-emerald-600', 'border-emerald-400'); }, 2000);
+        });
     }
+
+    function filterHistory(query) {
+        const q = query.toLowerCase();
+        document.querySelectorAll('.history-row').forEach(row => {
+            const name = row.dataset.name || '';
+            const os   = row.dataset.os   || '';
+            row.style.display = (name.includes(q) || os.includes(q)) ? '' : 'none';
+        });
+    }
+
+    // Close modal on backdrop click
+    document.getElementById('viewModal').addEventListener('click', function(e) {
+        if (e.target === this) closeModal();
+    });
 </script>
 {% endblock %}

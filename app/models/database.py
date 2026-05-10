@@ -1,12 +1,17 @@
-from sqlmodel import SQLModel, create_engine
 import os
+from sqlmodel import SQLModel, create_engine
 from dotenv import load_dotenv
 
 load_dotenv()
 
-sqlite_url = os.getenv("DATABASE_URL", "sqlite:///./loom.db")
-engine = create_engine(sqlite_url, echo=True)
+DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./loom.db")
+APP_ENV = os.getenv("APP_ENV", "development")
 
-def create_db_and_tables():
-    from app.models.config import Template, Configuration # Ensure models are registered
+# Only enable SQL echo in development mode for debugging
+engine = create_engine(DATABASE_URL, echo=(APP_ENV == "development"))
+
+
+def create_db_and_tables() -> None:
+    """Create all database tables if they don't exist."""
+    from app.models.config import Configuration  # noqa: F401 — register model
     SQLModel.metadata.create_all(engine)
