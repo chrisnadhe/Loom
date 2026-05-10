@@ -25,3 +25,7 @@ async def list_history(request: Request):
 @router.get("/templates", response_class=HTMLResponse)
 async def list_templates(request: Request):
     return templates.TemplateResponse(request, "templates.html")
+
+@router.get("/download", response_class=HTMLResponse)
+async def download_page(request: Request):
+    return templates.TemplateResponse(request, "download.html")

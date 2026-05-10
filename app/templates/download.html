@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="space-y-8">
+    <div class="flex justify-between items-center">
+        <div>
+            <h1 class="text-3xl font-bold tracking-tight">Download Data Templates</h1>
+            <p class="text-slate-500">Download the Excel templates to prepare your data for configuration generation.</p>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- 01. Global Params -->
+        <div class="glass rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4 flex flex-col">
+            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9-3-9m-9 9h18">
+                    </path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold">Global Params</h3>
+                <p class="text-sm text-slate-500 mt-2">Device-level settings: hostname, timezone, SSH, and more.</p>
+            </div>
+            <a href="/api/download-template/params"
+                class="w-full mt-4 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20">
+                Download XLSX
+            </a>
+        </div>
+
+        <!-- 02. VLANs -->
+        <div class="glass rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4 flex flex-col">
+            <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 rounded-2xl flex items-center justify-center text-emerald-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4">
+                    </path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold">VLANs</h3>
+                <p class="text-sm text-slate-500 mt-2">VLAN definitions: IDs, names, and IP addresses.</p>
+            </div>
+            <a href="/api/download-template/vlans"
+                class="w-full mt-4 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20">
+                Download XLSX
+            </a>
+        </div>
+
+        <!-- 03. Etherchannels -->
+        <div class="glass rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4 flex flex-col">
+            <div class="w-12 h-12 bg-amber-100 dark:bg-amber-900/30 rounded-2xl flex items-center justify-center text-amber-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                    </path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold">Etherchannels</h3>
+                <p class="text-sm text-slate-500 mt-2">Port-channel mappings and mode configurations.</p>
+            </div>
+            <a href="/api/download-template/etherchannels"
+                class="w-full mt-4 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20">
+                Download XLSX
+            </a>
+        </div>
+
+        <!-- 04. Port Mapping -->
+        <div class="glass rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl space-y-4 flex flex-col">
+            <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m4-4l-4-4"></path>
+                </svg>
+            </div>
+            <div class="flex-1">
+                <h3 class="text-xl font-bold">Port Mapping</h3>
+                <p class="text-sm text-slate-500 mt-2">Interface-level details: mode, VLANs, and descriptions.</p>
+            </div>
+            <a href="/api/download-template/ports"
+                class="w-full mt-4 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition-all text-sm flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20">
+                Download XLSX
+            </a>
+        </div>
+    </div>
+
+    <!-- Info Section -->
+    <div class="p-6 bg-brand-50 dark:bg-brand-900/10 rounded-3xl border border-brand-100 dark:border-brand-900/20">
+        <div class="flex gap-4">
+            <div class="w-10 h-10 rounded-full bg-brand-100 dark:bg-brand-900/30 flex items-center justify-center text-brand-600 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+            </div>
+            <div class="space-y-2">
+                <h4 class="font-bold text-brand-900 dark:text-brand-300">Compatibility Note</h4>
+                <p class="text-sm text-brand-700 dark:text-brand-400">All templates provided above are compatible with Cisco IOS, IOS-XE, Arista EOS, and Aruba AOS-CX devices within the Loom generator. Ensure the hostname column matches across different files for proper data merging.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
