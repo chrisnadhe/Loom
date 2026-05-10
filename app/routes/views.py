@@ -18,10 +18,17 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 
+from app.services.template_engine import TemplateEngine
+
 @router.get("/", response_class=HTMLResponse)
 async def index(request: Request):
-    return templates.TemplateResponse(request, "index.html")
-
+    engine = TemplateEngine()
+    available_templates = engine.list_available_templates()
+    return templates.TemplateResponse(
+        request, 
+        "index.html", 
+        {"available_templates": available_templates}
+    )
 
 @router.get("/history", response_class=HTMLResponse)
 async def list_history(request: Request):
