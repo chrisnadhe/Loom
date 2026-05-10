@@ -1,4 +1,0 @@
-hostname,ip_address,subnet_mask,cidr,peer_name,description,vlan_id,vlan_name
-CORE-SW-01,10.0.0.1,255.255.255.0,24,DIST-SW-01,Core to Distribution,10,Management
-DIST-SW-01,10.0.0.2,255.255.255.0,24,CORE-SW-01,Distribution to Core,20,Users
-ACC-SW-01,10.0.1.1,255.255.255.0,24,DIST-SW-01,Access to Distribution,30,Printers

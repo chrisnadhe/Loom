@@ -131,16 +131,46 @@ def _build_config_context(device: dict, all_vars: list[str], mappings: dict) -> 
 # Template downloads
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# Shared (vendor-agnostic) column definitions — column names are identical
+# across all platforms; only sample values differ.
+# ---------------------------------------------------------------------------
+
+_CISCO_PARAMS_HEADERS = [
+    "hostname", "timezone", "domain_name", "stp_mode", "vtp_domain",
+    "vtp_version", "vtp_mode", "logging_console", "logging_buffer_size",
+    "http_server", "errdisable", "errdisable_recovery_interval", "lldp",
+    "username", "algorithm_type", "password", "enable_password",
+    "ssh_key_size", "ssh_version", "vty_lines", "login_local", "timeout",
+    "transport_input", "transport_output",
+]
+
+_ARISTA_PARAMS_HEADERS = [
+    "hostname", "timezone", "domain_name", "stp_mode", "lldp",
+    "logging_console", "logging_buffer_size", "http_server",
+    "username", "algorithm_type", "password", "enable_password",
+    "ssh_key_size", "ssh_version", "vty_lines", "timeout",
+]
+
+_ARUBA_PARAMS_HEADERS = [
+    "hostname", "timezone", "domain_name", "stp_mode", "lldp",
+    "logging_console", "logging_buffer_size", "http_server",
+    "username", "algorithm_type", "password",
+    "ssh_key_size", "ssh_version", "vty_lines", "timeout",
+]
+
+_VLAN_HEADERS = ["hostname", "id", "name", "ip_addr", "mask", "desc"]
+_ETHERCHANNEL_HEADERS = [
+    "hostname", "id", "type", "mode", "access_vlan", "native_vlan",
+    "allowed_vlans", "ip_addr", "mask", "desc",
+]
+
 _TEMPLATE_DEFINITIONS: dict[str, tuple[list[str], list[list], str]] = {
+    # ------------------------------------------------------------------
+    # Generic / Cisco IOS style
+    # ------------------------------------------------------------------
     "params": (
-        [
-            "hostname", "timezone", "domain_name", "stp_mode", "vtp_domain",
-            "vtp_version", "vtp_mode", "logging_console", "logging_buffer_size",
-            "http_server", "errdisable", "errdisable_recovery_interval", "lldp",
-            "username", "algorithm_type", "password", "enable_password",
-            "ssh_key_size", "ssh_version", "vty_lines", "login_local", "timeout",
-            "transport_input", "transport_output",
-        ],
+        _CISCO_PARAMS_HEADERS,
         [[
             "Switch-01", "GMT +7", "loom.local", "rapid-pvst", "LOOM", "3",
             "server", "7", "8192", "no", "yes", "300", "yes", "admin", "scrypt",
@@ -149,7 +179,7 @@ _TEMPLATE_DEFINITIONS: dict[str, tuple[list[str], list[list], str]] = {
         "01_params.xlsx",
     ),
     "vlans": (
-        ["hostname", "id", "name", "ip_addr", "mask", "desc"],
+        _VLAN_HEADERS,
         [
             ["Switch-01", "10", "USERS", "192.168.10.1", "255.255.255.0", "User VLAN"],
             ["Switch-01", "20", "SERVERS", "192.168.20.1", "255.255.255.0", "Server VLAN"],
@@ -157,17 +187,82 @@ _TEMPLATE_DEFINITIONS: dict[str, tuple[list[str], list[list], str]] = {
         "02_vlans.xlsx",
     ),
     "etherchannels": (
-        ["hostname", "id", "type", "mode", "access_vlan", "native_vlan", "allowed_vlans", "ip_addr", "mask", "desc"],
+        _ETHERCHANNEL_HEADERS,
         [["Switch-01", "1", "L2", "trunk", "", "1", "all", "", "", "Core Uplink"]],
         "03_etherchannels.xlsx",
     ),
     "ports": (
-        ["hostname", "name", "mode", "access_vlan", "voice_vlan", "native_vlan", "allowed_vlans", "portfast", "bpduguard", "portsecurity", "description"],
+        ["hostname", "name", "mode", "access_vlan", "voice_vlan", "native_vlan",
+         "allowed_vlans", "portfast", "bpduguard", "portsecurity", "description"],
         [
             ["Switch-01", "GigabitEthernet0/1", "access", "10", "100", "", "", "yes", "yes", "yes", "User Port"],
             ["Switch-01", "GigabitEthernet0/2", "trunk", "", "", "1", "all", "no", "no", "no", "Uplink"],
         ],
         "04_port_mapping.xlsx",
+    ),
+    # ------------------------------------------------------------------
+    # Arista EOS — params only differ (no VTP); ports use Ethernet1 style
+    # ------------------------------------------------------------------
+    "arista-params": (
+        _ARISTA_PARAMS_HEADERS,
+        [["Arista-01", "GMT +7", "loom.local", "rapid-pvst", "yes",
+          "7", "8192", "no", "admin", "sha256", "Arista123!", "Enable123!",
+          "2048", "2", "15", "5"]],
+        "01_arista_params.xlsx",
+    ),
+    "arista-vlans": (
+        _VLAN_HEADERS,
+        [
+            ["Arista-01", "10", "USERS", "192.168.10.1", "24", "User VLAN"],
+            ["Arista-01", "20", "SERVERS", "192.168.20.1", "24", "Server VLAN"],
+        ],
+        "02_arista_vlans.xlsx",
+    ),
+    "arista-etherchannels": (
+        _ETHERCHANNEL_HEADERS,
+        [["Arista-01", "1", "L2", "trunk", "", "1", "all", "", "", "Core Uplink"]],
+        "03_arista_etherchannels.xlsx",
+    ),
+    "arista-ports": (
+        ["hostname", "name", "mode", "access_vlan", "voice_vlan", "native_vlan",
+         "allowed_vlans", "portfast", "bpduguard", "portsecurity", "description"],
+        [
+            ["Arista-01", "Ethernet1", "access", "10", "", "", "", "yes", "yes", "no", "User Port"],
+            ["Arista-01", "Ethernet2", "trunk", "", "", "1", "all", "no", "no", "no", "Uplink"],
+        ],
+        "04_arista_port_mapping.xlsx",
+    ),
+    # ------------------------------------------------------------------
+    # Aruba AOS-CX — params differ (no VTP/errdisable); ports use 1/1/x style
+    # ------------------------------------------------------------------
+    "aruba-params": (
+        _ARUBA_PARAMS_HEADERS,
+        [["Aruba-01", "GMT +7", "loom.local", "rapid-pvst", "yes",
+          "6", "8192", "yes", "admin", "sha256", "Aruba123!",
+          "2048", "2", "15", "5"]],
+        "01_aruba_params.xlsx",
+    ),
+    "aruba-vlans": (
+        _VLAN_HEADERS,
+        [
+            ["Aruba-01", "10", "USERS", "192.168.10.1", "24", "User VLAN"],
+            ["Aruba-01", "20", "SERVERS", "192.168.20.1", "24", "Server VLAN"],
+        ],
+        "02_aruba_vlans.xlsx",
+    ),
+    "aruba-etherchannels": (
+        _ETHERCHANNEL_HEADERS,
+        [["Aruba-01", "1", "L2", "trunk", "", "1", "all", "", "", "Core Uplink"]],
+        "03_aruba_etherchannels.xlsx",
+    ),
+    "aruba-ports": (
+        ["hostname", "name", "mode", "access_vlan", "voice_vlan", "native_vlan",
+         "allowed_vlans", "portfast", "bpduguard", "portsecurity", "description"],
+        [
+            ["Aruba-01", "1/1/1", "access", "10", "", "", "", "yes", "yes", "no", "User Port"],
+            ["Aruba-01", "1/1/2", "trunk", "", "", "1", "all", "no", "no", "no", "Uplink"],
+        ],
+        "04_aruba_port_mapping.xlsx",
     ),
 }
 
