@@ -94,9 +94,9 @@ exit
 !
 {% if vlan.ip_addr|length > 0 %}
 interface Vlan {{ vlan.id }}
-ip address {{ vlan.ip_addr }} {{ vlan.mask }}
-{% if vlan.desc|length > 0 %}
-description *** {{ vlan.desc }} ***
+ip address {{ vlan.ip_addr }} {{ vlan.mask | to_mask }}
+{% if vlan.description|length > 0 %}
+description *** {{ vlan.description }} ***
 {% endif %}
 no shutdown
 exit
@@ -118,14 +118,14 @@ switchport access vlan {{ portchannel.access_vlan }}
 switchport trunk native vlan {{ portchannel.native_vlan }}
 {% endif %}
 {% if portchannel.type|upper == 'L2' and portchannel.mode == 'trunk' and (portchannel.allowed_vlans != 'all' and portchannel.allowed_vlans|length > 0) %}
-switchport trunk allowed vlans {{ portchannel.allowed_vlans }}
+switchport trunk allowed vlan {{ portchannel.allowed_vlans }}
 {% endif %}
 {% if portchannel.type|upper == 'L3' %}
 no switchport
-ip address {{ portchannel.ip_addr }} {{ portchannel.mask }}
+ip address {{ portchannel.ip_addr }} {{ portchannel.mask | to_mask }}
 {% endif %}
-{% if portchannel.desc|length > 0 %}
-description *** {{ portchannel.desc }} ***
+{% if portchannel.description|length > 0 %}
+description *** {{ portchannel.description }} ***
 {% endif %}
 no shutdown
 exit
@@ -135,8 +135,8 @@ exit
 interface {{ port.name }}
 {% if port.mode != 'trunk' and port.mode != 'access' %}
 {{ port.mode }}
-{% if port.desc|length > 0 %}
-description *** {{ port.desc }} ***
+{% if port.description|length > 0 %}
+description *** {{ port.description }} ***
 {% endif %}
 {% endif %}
 {% if port.mode == 'access' %}
@@ -159,7 +159,7 @@ switchport mode trunk
 switchport trunk native vlan {{ port.native_vlan }}
 {% endif %}
 {% if (port.mode == 'trunk' and (port.allowed_vlans != 'all' and port.allowed_vlans|length > 0)) %}
-switchport trunk allowed vlans {{ port.allowed_vlans }}
+switchport trunk allowed vlan {{ port.allowed_vlans }}
 {% endif %}
 {% if port.portfast == 'yes' %}
 spanning-tree portfast

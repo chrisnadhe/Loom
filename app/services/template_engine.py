@@ -3,6 +3,7 @@ Jinja2 template engine wrapper for rendering network configuration templates.
 """
 
 import os
+import ipaddress
 from datetime import datetime
 
 from jinja2 import Environment, FileSystemLoader, Template, nodes, meta
@@ -27,8 +28,26 @@ class TemplateEngine:
         def _raise(msg: str) -> None:
             raise Exception(msg)
 
+        def _to_cidr(mask: str) -> str:
+            try:
+                if mask.startswith('/'): return mask[1:]
+                if '.' in mask:
+                    return str(ipaddress.IPv4Network(f'0.0.0.0/{mask}').prefixlen)
+                return mask
+            except:
+                return mask
+
+        def _to_mask(cidr: str) -> str:
+            try:
+                if '.' in cidr: return cidr
+                return str(ipaddress.IPv4Network(f'0.0.0.0/{cidr}').netmask)
+            except:
+                return cidr
+
         self.env.globals["now"] = datetime.now().replace(microsecond=0)
         self.env.globals["raise"] = _raise
+        self.env.filters["to_cidr"] = _to_cidr
+        self.env.filters["to_mask"] = _to_mask
 
     # ------------------------------------------------------------------
 

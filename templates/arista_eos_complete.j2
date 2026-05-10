@@ -98,10 +98,10 @@ vlan {{ vlan.id }}
 !
 {% if vlan.ip_addr|length > 0 %}
 interface Vlan{{ vlan.id }}
-{% if vlan.desc|length > 0 %}
-   description *** {{ vlan.desc }} ***
+{% if vlan.description|length > 0 %}
+   description *** {{ vlan.description }} ***
 {% endif %}
-   ip address {{ vlan.ip_addr }}/{{ vlan.mask }}
+   ip address {{ vlan.ip_addr }}/{{ vlan.mask | to_cidr }}
    no shutdown
 !
 {% endif %}
@@ -113,8 +113,8 @@ interface Vlan{{ vlan.id }}
 !
 {% for portchannel in etherchannels %}
 interface Port-Channel{{ portchannel.id }}
-{% if portchannel.desc|length > 0 %}
-   description *** {{ portchannel.desc }} ***
+{% if portchannel.description|length > 0 %}
+   description *** {{ portchannel.description }} ***
 {% endif %}
 {% if portchannel.type|upper == 'L2' %}
    switchport
@@ -131,7 +131,7 @@ interface Port-Channel{{ portchannel.id }}
 {% endif %}
 {% if portchannel.type|upper == 'L3' %}
    no switchport
-   ip address {{ portchannel.ip_addr }}/{{ portchannel.mask }}
+   ip address {{ portchannel.ip_addr }}/{{ portchannel.mask | to_cidr }}
 {% endif %}
    no shutdown
 !
