@@ -142,21 +142,21 @@ _CISCO_PARAMS_HEADERS = [
     "http_server", "errdisable", "errdisable_recovery_interval", "lldp",
     "username", "algorithm_type", "password", "enable_password",
     "ssh_key_size", "ssh_version", "vty_lines", "login_local", "timeout",
-    "transport_input", "transport_output",
+    "transport_input", "transport_output", "banner_motd",
 ]
 
 _ARISTA_PARAMS_HEADERS = [
     "hostname", "timezone", "domain_name", "stp_mode", "lldp",
     "logging_console", "logging_buffer_size", "http_server",
     "username", "algorithm_type", "password", "enable_password",
-    "ssh_key_size", "ssh_version", "vty_lines", "timeout",
+    "ssh_key_size", "ssh_version", "vty_lines", "timeout", "banner_motd",
 ]
 
 _ARUBA_PARAMS_HEADERS = [
     "hostname", "timezone", "domain_name", "stp_mode", "lldp",
     "logging_console", "logging_buffer_size", "http_server",
     "username", "algorithm_type", "password",
-    "ssh_key_size", "ssh_version", "vty_lines", "timeout",
+    "ssh_key_size", "ssh_version", "vty_lines", "timeout", "banner_motd",
 ]
 
 _VLAN_HEADERS = ["hostname", "id", "name", "ip_addr", "mask", "desc"]
@@ -175,6 +175,7 @@ _TEMPLATE_DEFINITIONS: dict[str, tuple[list[str], list[list], str]] = {
             "Switch-01", "GMT +7", "loom.local", "rapid-pvst", "LOOM", "3",
             "server", "7", "8192", "no", "yes", "300", "yes", "admin", "scrypt",
             "Cisco123!", "Enable123!", "2048", "2", "15", "yes", "5", "ssh", "all",
+            "UNAUTHORIZED ACCESS IS PROHIBITED",
         ]],
         "01_params.xlsx",
     ),
@@ -207,7 +208,8 @@ _TEMPLATE_DEFINITIONS: dict[str, tuple[list[str], list[list], str]] = {
         _ARISTA_PARAMS_HEADERS,
         [["Arista-01", "GMT +7", "loom.local", "rapid-pvst", "yes",
           "7", "8192", "no", "admin", "sha256", "Arista123!", "Enable123!",
-          "2048", "2", "15", "5"]],
+          "2048", "2", "15", "5", "UNAUTHORIZED ACCESS IS PROHIBITED"]],
+
         "01_arista_params.xlsx",
     ),
     "arista-vlans": (
@@ -239,7 +241,8 @@ _TEMPLATE_DEFINITIONS: dict[str, tuple[list[str], list[list], str]] = {
         _ARUBA_PARAMS_HEADERS,
         [["Aruba-01", "GMT +7", "loom.local", "rapid-pvst", "yes",
           "6", "8192", "yes", "admin", "sha256", "Aruba123!",
-          "2048", "2", "15", "5"]],
+          "2048", "2", "15", "5", "UNAUTHORIZED ACCESS IS PROHIBITED"]],
+
         "01_aruba_params.xlsx",
     ),
     "aruba-vlans": (

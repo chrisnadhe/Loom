@@ -67,26 +67,18 @@ errdisable recovery interval {{ errdisable_recovery_interval }}
 {% endif %}
 !
 banner motd $
-#################** D I S C L A I M E R **##################
-# #
-# UNAUTHORIZED ACCESS TO THIS DEVICE IS PROHIBITED #
-# #
-# Restricted to authorized individuals ONLY. #
-# #
-# You MUST have explicit, authorized permission to #
-# access or configure this device. #
-# #
-# All activities performed on this device are logged, #
-# monitored, and recorded. #
-# #
-# Unauthorized attempts and actions to access, modify #
-# or use this system may result in civil and/or criminal #
-# penalties. #
-# #
-# Disconnect IMMEDIATELY if you are not an authorized #
-# user. #
-# #
+{% if banner_motd|length > 0 %}
+{{ banner_motd }}
+{% else %}
 ############################################################
+#                                                          #
+#  UNAUTHORIZED ACCESS TO THIS DEVICE IS PROHIBITED       #
+#                                                          #
+#  You MUST have explicit permission to access or          #
+#  configure this device. Unauthorized use is illegal.     #
+#                                                          #
+############################################################
+{% endif %}
 $
 !
 interface Vlan 1

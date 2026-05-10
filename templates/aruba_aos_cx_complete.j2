@@ -65,11 +65,18 @@ spanning-tree mode mstp
 ! === Banner ===
 !
 banner motd
-#################** D I S C L A I M E R **##################
+{% if banner_motd|length > 0 %}
+{{ banner_motd }}
+{% else %}
+############################################################
 #                                                          #
 #  UNAUTHORIZED ACCESS TO THIS DEVICE IS PROHIBITED       #
 #                                                          #
+#  You MUST have explicit permission to access or          #
+#  configure this device. Unauthorized use is illegal.     #
+#                                                          #
 ############################################################
+{% endif %}
 
 !
 ! === VLANs ===
