@@ -3,137 +3,18 @@
 {% block title %}Download Templates — Loom{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <!-- Header -->
-    <div>
-        <h1 class="text-3xl font-bold tracking-tight">Download Data Templates</h1>
-        <p class="text-slate-500 mt-1">Download the Excel templates for your target OS, fill in your data, then upload to generate configs.</p>
-    </div>
 
-    <!-- OS Tabs -->
-    <div class="flex gap-2 border-b border-slate-200 dark:border-slate-800" id="vendor-tabs">
-        {% set vendors = [
-            ('cisco',  'Cisco IOS / IOS-XE', 'brand',   'M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01'),
-            ('arista', 'Arista EOS',           'emerald', 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18'),
-            ('aruba',  'Aruba AOS-CX',         'orange',  'M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z'),
-        ] %}
-        {% for slug, label, color, icon in vendors %}
-        <button onclick="switchVendor('{{ slug }}')" id="tab-{{ slug }}"
-            class="vendor-tab flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 transition-colors
-                   {% if loop.first %}border-brand-500 text-brand-600{% else %}border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300{% endif %}">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ icon }}"/>
-            </svg>
-            {{ label }}
-        </button>
-        {% endfor %}
-    </div>
-
-    <!-- ── Cisco Panel ───────────────────────────────────────────── -->
-    <div id="panel-cisco" class="vendor-panel space-y-6">
-        <div class="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
-            <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <p class="text-sm text-blue-700 dark:text-blue-400">
-                Compatible with <strong>Cisco IOS</strong> and <strong>Cisco IOS-XE</strong>. Use <code class="bg-blue-100 dark:bg-blue-900/30 px-1 rounded">mask</code> as dotted-decimal (e.g. <code class="bg-blue-100 dark:bg-blue-900/30 px-1 rounded">255.255.255.0</code>).
-            </p>
-        </div>
-        {{ template_cards([
-            ('params',        '01 — Global Params',   'Device hostname, timezone, SSH, VTP, STP, and credentials.',  'blue'),
-            ('vlans',         '02 — VLANs',           'VLAN IDs, names, and optional SVI IP addresses.',             'emerald'),
-            ('etherchannels', '03 — Etherchannels',   'Port-channel IDs, type (L2/L3), and mode (trunk/access).',    'amber'),
-            ('ports',         '04 — Port Mapping',    'GigabitEthernetX/X — mode, VLANs, portfast, BPDU guard.',    'indigo'),
-        ]) }}
-    </div>
-
-    <!-- ── Arista Panel ──────────────────────────────────────────── -->
-    <div id="panel-arista" class="vendor-panel hidden space-y-6">
-        <div class="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/20">
-            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <p class="text-sm text-emerald-700 dark:text-emerald-400">
-                For <strong>Arista EOS</strong> (7000/7500 Series). No VTP columns needed. Use <code class="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded">mask</code> as prefix length (e.g. <code class="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded">24</code>). Interfaces: <code class="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded">EthernetX</code>.
-            </p>
-        </div>
-        {{ template_cards([
-            ('arista-params',        '01 — Global Params',   'Hostname, timezone, SSH, STP, and credentials. No VTP.',     'blue'),
-            ('arista-vlans',         '02 — VLANs',           'VLAN IDs, names, and optional SVI with CIDR mask.',           'emerald'),
-            ('arista-etherchannels', '03 — Port-Channel',    'Port-Channel IDs, type (L2/L3), and mode (trunk/access).',    'amber'),
-            ('arista-ports',         '04 — Port Mapping',    'EthernetX — mode, VLANs, portfast, BPDU guard.',             'indigo'),
-        ]) }}
-    </div>
-
-    <!-- ── Aruba Panel ───────────────────────────────────────────── -->
-    <div id="panel-aruba" class="vendor-panel hidden space-y-6">
-        <div class="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/10 rounded-2xl border border-orange-100 dark:border-orange-900/20">
-            <svg class="w-5 h-5 text-orange-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-            <p class="text-sm text-orange-700 dark:text-orange-400">
-                For <strong>Aruba AOS-CX</strong> (6000/6100/8000 Series). No VTP or errdisable columns. Use <code class="bg-orange-100 dark:bg-orange-900/30 px-1 rounded">mask</code> as prefix length (e.g. <code class="bg-orange-100 dark:bg-orange-900/30 px-1 rounded">24</code>). Interfaces: <code class="bg-orange-100 dark:bg-orange-900/30 px-1 rounded">1/1/X</code>. LAG replaces Etherchannel.
-            </p>
-        </div>
-        {{ template_cards([
-            ('aruba-params',        '01 — Global Params',   'Hostname, timezone, SSH, STP, and credentials. No VTP.',       'blue'),
-            ('aruba-vlans',         '02 — VLANs',           'VLAN IDs, names, and optional SVI with CIDR mask.',             'emerald'),
-            ('aruba-etherchannels', '03 — LAG',             'LAG (Link Aggregation) IDs, type (L2/L3), and mode.',           'amber'),
-            ('aruba-ports',         '04 — Port Mapping',    '1/1/X — mode, VLANs, portfast (admin-edge), BPDU guard.',      'indigo'),
-        ]) }}
-    </div>
-
-    <!-- Column reference -->
-    <div class="glass rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl">
-        <h3 class="font-bold text-lg mb-4">Column Reference</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
-            <div class="space-y-2">
-                <p class="font-bold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wider">Common Fields</p>
-                <table class="w-full text-xs">
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                        {% for col, desc in [('hostname','Must match across all files for correct merging'), ('mode','access | trunk'), ('portfast','yes | no'), ('bpduguard','yes | no'), ('portsecurity','yes | no'), ('type (etherchannel)','L2 | L3'), ('algorithm_type','scrypt | sha256')] %}
-                        <tr class="py-1.5">
-                            <td class="py-1.5 pr-3 font-mono text-brand-600 dark:text-brand-400 whitespace-nowrap">{{ col }}</td>
-                            <td class="py-1.5 text-slate-500">{{ desc }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="space-y-2">
-                <p class="font-bold text-slate-600 dark:text-slate-400 text-xs uppercase tracking-wider">Vendor Differences</p>
-                <table class="w-full text-xs">
-                    <thead><tr class="text-slate-400"><th class="text-left py-1 pr-3">Feature</th><th class="text-left py-1 pr-3">Cisco</th><th class="text-left py-1 pr-3">Arista</th><th class="text-left py-1">Aruba</th></tr></thead>
-                    <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
-                        {% for row in [
-                            ('mask format', 'dotted', 'CIDR /XX', 'CIDR /XX'),
-                            ('port format', 'Gi0/1', 'Ethernet1', '1/1/1'),
-                            ('LAG keyword', 'port-channel', 'Port-Channel', 'interface lag'),
-                            ('VTP', '✓', '✗', '✗'),
-                            ('errdisable', '✓', '✗', '✗'),
-                        ] %}
-                        <tr>
-                            <td class="py-1.5 pr-3 text-slate-600 dark:text-slate-400 font-medium">{{ row[0] }}</td>
-                            <td class="py-1.5 pr-3 text-slate-500">{{ row[1] }}</td>
-                            <td class="py-1.5 pr-3 text-slate-500">{{ row[2] }}</td>
-                            <td class="py-1.5 text-slate-500">{{ row[3] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
-
-{# ── Macro: render a row of 4 download cards ── #}
-{% macro template_cards(items) %}
+{# ── Macro: render a row of 4 download cards ─────────────────────── #}
+{% macro render_cards(items) %}
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    {% set color_bg = {'blue': 'bg-blue-100 dark:bg-blue-900/30', 'emerald': 'bg-emerald-100 dark:bg-emerald-900/30', 'amber': 'bg-amber-100 dark:bg-amber-900/30', 'indigo': 'bg-indigo-100 dark:bg-indigo-900/30'} %}
+    {% set color_text = {'blue': 'text-blue-600', 'emerald': 'text-emerald-600', 'amber': 'text-amber-600', 'indigo': 'text-indigo-600'} %}
     {% for slug, title, desc, color in items %}
-    {% set colors = {
-        'blue':    ('bg-blue-100 dark:bg-blue-900/30', 'text-blue-600'),
-        'emerald': ('bg-emerald-100 dark:bg-emerald-900/30', 'text-emerald-600'),
-        'amber':   ('bg-amber-100 dark:bg-amber-900/30', 'text-amber-600'),
-        'indigo':  ('bg-indigo-100 dark:bg-indigo-900/30', 'text-indigo-600'),
-    } %}
     <div class="glass rounded-2xl p-5 border border-slate-200 dark:border-slate-800 shadow-lg flex flex-col gap-3 hover:shadow-xl transition-shadow">
-        <div class="w-10 h-10 {{ colors[color][0] }} rounded-xl flex items-center justify-center {{ colors[color][1] }}">
+        <div class="w-10 h-10 {{ color_bg[color] }} rounded-xl flex items-center justify-center {{ color_text[color] }}">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
             </svg>
         </div>
         <div class="flex-1">
@@ -143,7 +24,8 @@
         <a href="/api/download-template/{{ slug }}"
             class="w-full px-3 py-2 bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-xl transition-all text-xs flex items-center justify-center gap-1.5 shadow-md shadow-brand-500/20">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
             </svg>
             Download XLSX
         </a>
@@ -152,23 +34,169 @@
 </div>
 {% endmacro %}
 
+<div class="space-y-8">
+    <!-- Header -->
+    <div>
+        <h1 class="text-3xl font-bold tracking-tight">Download Data Templates</h1>
+        <p class="text-slate-500 mt-1">Download the Excel templates for your target OS, fill in your data, then upload to generate configs.</p>
+    </div>
+
+    <!-- OS Tabs -->
+    <div class="flex flex-wrap gap-1 border-b border-slate-200 dark:border-slate-800">
+        <button onclick="switchVendor('cisco')"  id="tab-cisco"
+            class="vendor-tab flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 border-brand-500 text-brand-600 transition-colors -mb-px">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2m-2-4h.01M17 16h.01"/>
+            </svg>
+            Cisco IOS / IOS-XE
+        </button>
+        <button onclick="switchVendor('arista')" id="tab-arista"
+            class="vendor-tab flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors -mb-px">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
+            </svg>
+            Arista EOS
+        </button>
+        <button onclick="switchVendor('aruba')"  id="tab-aruba"
+            class="vendor-tab flex items-center gap-2 px-4 py-3 text-sm font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 transition-colors -mb-px">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
+            </svg>
+            Aruba AOS-CX
+        </button>
+    </div>
+
+    <!-- ── Cisco Panel ─────────────────────────────────────────────── -->
+    <div id="panel-cisco" class="vendor-panel space-y-5">
+        <div class="flex items-center gap-3 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
+            <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-sm text-blue-700 dark:text-blue-400">
+                Compatible with <strong>Cisco IOS</strong> and <strong>Cisco IOS-XE</strong>.
+                Use <code class="bg-blue-100 dark:bg-blue-900/30 px-1 rounded">mask</code> as dotted-decimal
+                (e.g. <code class="bg-blue-100 dark:bg-blue-900/30 px-1 rounded">255.255.255.0</code>).
+            </p>
+        </div>
+        {{ render_cards([
+            ('params',        '01 — Global Params',   'Device hostname, timezone, SSH, VTP, STP, and credentials.',   'blue'),
+            ('vlans',         '02 — VLANs',           'VLAN IDs, names, and optional SVI IP addresses.',              'emerald'),
+            ('etherchannels', '03 — Etherchannels',   'Port-channel IDs, type (L2/L3), and mode (trunk/access).',     'amber'),
+            ('ports',         '04 — Port Mapping',    'GigabitEthernetX/X — mode, VLANs, portfast, BPDU guard.',     'indigo'),
+        ]) }}
+    </div>
+
+    <!-- ── Arista Panel ────────────────────────────────────────────── -->
+    <div id="panel-arista" class="vendor-panel hidden space-y-5">
+        <div class="flex items-center gap-3 p-4 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/20">
+            <svg class="w-5 h-5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-sm text-emerald-700 dark:text-emerald-400">
+                For <strong>Arista EOS</strong> (7000/7500 Series). No VTP columns needed.
+                Use <code class="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded">mask</code> as prefix length
+                (e.g. <code class="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded">24</code>).
+                Interfaces: <code class="bg-emerald-100 dark:bg-emerald-900/30 px-1 rounded">EthernetX</code>.
+            </p>
+        </div>
+        {{ render_cards([
+            ('arista-params',        '01 — Global Params',   'Hostname, timezone, SSH, STP, and credentials. No VTP.',      'blue'),
+            ('arista-vlans',         '02 — VLANs',           'VLAN IDs, names, and optional SVI with CIDR mask.',            'emerald'),
+            ('arista-etherchannels', '03 — Port-Channel',    'Port-Channel IDs, type (L2/L3), and mode (trunk/access).',     'amber'),
+            ('arista-ports',         '04 — Port Mapping',    'EthernetX — mode, VLANs, portfast, BPDU guard.',              'indigo'),
+        ]) }}
+    </div>
+
+    <!-- ── Aruba Panel ─────────────────────────────────────────────── -->
+    <div id="panel-aruba" class="vendor-panel hidden space-y-5">
+        <div class="flex items-center gap-3 p-4 bg-orange-50 dark:bg-orange-900/10 rounded-2xl border border-orange-100 dark:border-orange-900/20">
+            <svg class="w-5 h-5 text-orange-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="text-sm text-orange-700 dark:text-orange-400">
+                For <strong>Aruba AOS-CX</strong> (6000/6100/8000 Series). No VTP or errdisable columns.
+                Use <code class="bg-orange-100 dark:bg-orange-900/30 px-1 rounded">mask</code> as prefix length
+                (e.g. <code class="bg-orange-100 dark:bg-orange-900/30 px-1 rounded">24</code>).
+                Interfaces: <code class="bg-orange-100 dark:bg-orange-900/30 px-1 rounded">1/1/X</code>. LAG replaces Etherchannel.
+            </p>
+        </div>
+        {{ render_cards([
+            ('aruba-params',        '01 — Global Params',   'Hostname, timezone, SSH, STP, and credentials. No VTP.',         'blue'),
+            ('aruba-vlans',         '02 — VLANs',           'VLAN IDs, names, and optional SVI with CIDR mask.',               'emerald'),
+            ('aruba-etherchannels', '03 — LAG',             'LAG (Link Aggregation) IDs, type (L2/L3), and mode.',             'amber'),
+            ('aruba-ports',         '04 — Port Mapping',    '1/1/X — mode, VLANs, portfast (admin-edge), BPDU guard.',        'indigo'),
+        ]) }}
+    </div>
+
+    <!-- Column reference table -->
+    <div class="glass rounded-3xl p-6 border border-slate-200 dark:border-slate-800 shadow-xl">
+        <h3 class="font-bold text-lg mb-4">Vendor Comparison</h3>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b border-slate-200 dark:border-slate-800">
+                        <th class="text-left py-2 pr-6 text-xs font-bold uppercase text-slate-500">Feature</th>
+                        <th class="text-left py-2 pr-6 text-xs font-bold uppercase text-blue-600">Cisco</th>
+                        <th class="text-left py-2 pr-6 text-xs font-bold uppercase text-emerald-600">Arista</th>
+                        <th class="text-left py-2 text-xs font-bold uppercase text-orange-600">Aruba</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 dark:divide-slate-800">
+                    {% for row in [
+                        ('mask column format', 'dotted-decimal (255.x.x.x)', 'CIDR prefix (24)', 'CIDR prefix (24)'),
+                        ('Interface naming', 'GigabitEthernet0/1', 'Ethernet1', '1/1/1'),
+                        ('LAG / Port-Channel', 'port-channel X', 'Port-Channel X', 'interface lag X'),
+                        ('VTP support', '✓ Required', '✗ Not needed', '✗ Not needed'),
+                        ('errdisable', '✓ Required', '✗ Not needed', '✗ Not needed'),
+                        ('transport_input/output', '✓ Required', '✗ Not needed', '✗ Not needed'),
+                        ('portfast keyword', 'spanning-tree portfast', 'spanning-tree portfast', 'spanning-tree port-type admin-edge'),
+                    ] %}
+                    <tr>
+                        <td class="py-2.5 pr-6 font-medium text-slate-700 dark:text-slate-300">{{ row[0] }}</td>
+                        <td class="py-2.5 pr-6 text-slate-500 text-xs">{{ row[1] }}</td>
+                        <td class="py-2.5 pr-6 text-slate-500 text-xs">{{ row[2] }}</td>
+                        <td class="py-2.5 text-slate-500 text-xs">{{ row[3] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
 <script>
+    const vendorColors = {
+        cisco:  { border: 'border-brand-500',   text: 'text-brand-600'   },
+        arista: { border: 'border-emerald-500', text: 'text-emerald-600' },
+        aruba:  { border: 'border-orange-500',  text: 'text-orange-600'  },
+    };
+
     function switchVendor(slug) {
-        // Hide all panels, deactivate all tabs
+        // Hide all panels
         document.querySelectorAll('.vendor-panel').forEach(p => p.classList.add('hidden'));
+
+        // Reset all tabs
         document.querySelectorAll('.vendor-tab').forEach(t => {
-            t.classList.remove('border-brand-500', 'text-brand-600', 'border-emerald-500', 'text-emerald-600', 'border-orange-500', 'text-orange-600');
+            t.classList.remove(
+                'border-brand-500', 'text-brand-600',
+                'border-emerald-500', 'text-emerald-600',
+                'border-orange-500', 'text-orange-600'
+            );
             t.classList.add('border-transparent', 'text-slate-500');
         });
 
-        // Show active panel
+        // Show selected panel
         document.getElementById('panel-' + slug).classList.remove('hidden');
 
-        // Activate tab with per-vendor color
+        // Activate tab
         const tab = document.getElementById('tab-' + slug);
+        const colors = vendorColors[slug];
         tab.classList.remove('border-transparent', 'text-slate-500');
-        const colorMap = { cisco: ['border-brand-500','text-brand-600'], arista: ['border-emerald-500','text-emerald-600'], aruba: ['border-orange-500','text-orange-600'] };
-        tab.classList.add(...colorMap[slug]);
+        tab.classList.add(colors.border, colors.text);
     }
 </script>
+
 {% endblock %}
